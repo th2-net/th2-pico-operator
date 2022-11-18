@@ -92,7 +92,7 @@ complexity:
     includePrivateDeclarations: false
   ComplexMethod:
     active: true
-    threshold: 15
+    threshold: 20
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
@@ -131,7 +131,7 @@ complexity:
     ignoreArgumentsMatchingNames: false
   NestedBlockDepth:
     active: true
-    threshold: 5
+    threshold: 7
   ReplaceSafeCallChainWithRun:
     active: false
   StringLiteralDuplication:
@@ -296,7 +296,7 @@ naming:
     ignoreOverridden: true
   EnumNaming:
     active: true
-    enumEntryPattern: '[A-Z][_a-zA-Z0-9]*'
+    enumEntryPattern: '[_a-zA-Z0-9]*'
   ForbiddenClassName:
     active: false
     forbiddenName: []
@@ -537,7 +537,7 @@ style:
     active: true
     excludes: ['**']
   LoopWithTooManyJumpStatements:
-    active: true
+    active: false
     maxJumpCount: 1
   MagicNumber:
     active: true

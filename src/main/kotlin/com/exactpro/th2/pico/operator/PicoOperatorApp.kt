@@ -16,6 +16,54 @@
 
 package com.exactpro.th2.pico.operator
 
+import com.exactpro.th2.pico.operator.generator.ConfigHandler
+import com.exactpro.th2.pico.operator.generator.ConfigProcessor
+import com.exactpro.th2.pico.operator.mq.RabbitMQManager
+import com.exactpro.th2.pico.operator.mq.queue.QueuesProcessor
+import com.exactpro.th2.pico.operator.repo.RepositoryContext
+import mu.KotlinLogging
+
+const val EVENT_STORAGE_BOX_ALIAS = "estore"
+const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
+
+const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
+const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
+
+private val logger = KotlinLogging.logger { }
+
 fun main(args: Array<String>) {
-    println("App started")
+    val mode = if (args.isNotEmpty()) args[0] else "full"
+    when (mode) {
+        "full" -> {
+            ConfigHandler.clearOldConfigs()
+            ConfigHandler.copyDefaultConfigs()
+            RabbitMQManager.creteInitialSetup()
+
+            val queuesProcessor = QueuesProcessor()
+            RepositoryContext.boxResources.values.forEach {
+                ConfigProcessor(it).process()
+                queuesProcessor.process(it)
+            }
+            queuesProcessor.removeUnusedQueues()
+        }
+        "queues" -> {
+            RabbitMQManager.creteInitialSetup()
+            val queuesProcessor = QueuesProcessor()
+            RepositoryContext.boxResources.values.forEach {
+                queuesProcessor.process(it)
+            }
+            queuesProcessor.removeUnusedQueues()
+        }
+        "configs" -> {
+            ConfigHandler.clearOldConfigs()
+            ConfigHandler.copyDefaultConfigs()
+
+            RepositoryContext.boxResources.values.forEach {
+                ConfigProcessor(it).process()
+            }
+        }
+        else -> {
+            logger.error("Command line argument: {} is not supported", mode)
+        }
+    }
 }
