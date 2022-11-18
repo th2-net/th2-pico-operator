@@ -27,9 +27,6 @@ import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
 import com.exactpro.th2.pico.operator.mq.queue.Queue
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.http.client.Client
 import com.rabbitmq.http.client.ClientParameters
 import com.rabbitmq.http.client.domain.BindingInfo
@@ -45,7 +42,6 @@ object RabbitMQManager {
 
     private val schema = ConfigLoader.config.schemaName
     private val managementConfig: RabbitMQManagementConfig = ConfigLoader.config.rabbitMQManagement
-    private var channelContext: ChannelContext? = null
 
     private val client: Client = Client(
         ClientParameters()
@@ -54,21 +50,41 @@ object RabbitMQManager {
             .password(managementConfig.password)
     )
 
-    val channel: Channel
-        get() {
-            var channel = getChannelContext().channel
-            if (!channel.isOpen) {
-                logger.warn("RabbitMQ connection is broken, trying to reconnect...")
-                getChannelContext().close()
-                channel = getChannelContext().channel
-                logger.info("RabbitMQ connection has been restored")
-            }
-            return channel
-        }
+    val channel = RabbitMqChannelFactory.create(managementConfig)
 
     fun creteInitialSetup() {
         declareTopicExchange()
         setUpRabbitMqForSchema()
+    }
+
+    fun cleanupRabbit() {
+        removeSchemaExchange()
+        removeSchemaQueues()
+        removeSchemaUser()
+    }
+
+    fun getAllQueues(): List<QueueInfo> = client.getQueues(managementConfig.vhostName)
+
+    fun getQueueBindings(queue: String?): List<BindingInfo> = client.getQueueBindings(managementConfig.vhostName, queue)
+
+    fun getQueue(queueName: String): QueueInfo? = client.getQueue(managementConfig.vhostName, queueName)
+
+    fun generateQueueArguments(pinSettings: PinSettings?): Map<String, Any?> {
+        if (pinSettings == null) {
+            return emptyMap()
+        }
+        return if (pinSettings.storageOnDemand!!) {
+            emptyMap()
+        } else {
+            val args: MutableMap<String, Any?> = HashMap()
+            args["x-max-length"] = pinSettings.queueLength
+            args["x-overflow"] = pinSettings.overloadStrategy
+            args
+        }
+    }
+
+    fun closeChannel() {
+        channel.close()
     }
 
     private fun declareTopicExchange() {
@@ -155,12 +171,6 @@ object RabbitMQManager {
         logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
     }
 
-    fun cleanupRabbit() {
-        removeSchemaExchange()
-        removeSchemaQueues()
-        removeSchemaUser()
-    }
-
     private fun removeSchemaUser() {
         val vHostName = managementConfig.vhostName
         if (client.getVhost(vHostName) == null) {
@@ -198,34 +208,6 @@ object RabbitMQManager {
         }
     }
 
-    fun generateQueueArguments(pinSettings: PinSettings?): Map<String, Any?> {
-        if (pinSettings == null) {
-            return emptyMap()
-        }
-        return if (pinSettings.storageOnDemand!!) {
-            emptyMap()
-        } else {
-            val args: MutableMap<String, Any?> = HashMap()
-            args["x-max-length"] = pinSettings.queueLength
-            args["x-overflow"] = pinSettings.overloadStrategy
-            args
-        }
-    }
-
-    fun getAllQueues(): List<QueueInfo> = client.getQueues(managementConfig.vhostName)
-
-    fun getQueueBindings(queue: String?): List<BindingInfo> = client.getQueueBindings(managementConfig.vhostName, queue)
-
-    fun getQueue(queueName: String): QueueInfo? = client.getQueue(managementConfig.vhostName, queueName)
-
-    private fun getChannelContext(): ChannelContext {
-        // we do not need to synchronize as we are assigning immutable object from singleton
-        if (channelContext == null) {
-            channelContext = ChannelContext()
-        }
-        return channelContext!!
-    }
-
     private fun getUserPassword(): String {
         val defaultConfigs = ConfigLoader.config.defaultSchemaConfigs
         val rabbitMqAppConfig = Files.readString(
@@ -233,47 +215,5 @@ object RabbitMQManager {
         )
         val cmData: Map<String, String> = JSON_MAPPER.readValue(rabbitMqAppConfig)
         return cmData["password"]!!
-    }
-
-    internal class ChannelContext {
-        var channel: Channel
-        private var connection: Connection
-
-        init {
-            val rabbitMQManagementConfig = managementConfig
-            val connectionFactory = ConnectionFactory()
-            connectionFactory.host = rabbitMQManagementConfig.host
-            connectionFactory.port = rabbitMQManagementConfig.applicationPort
-            connectionFactory.virtualHost = rabbitMQManagementConfig.vhostName
-            connectionFactory.username = rabbitMQManagementConfig.username
-            connectionFactory.password = rabbitMQManagementConfig.password
-            try {
-                this.connection = connectionFactory.newConnection()
-                this.channel = connection.createChannel()
-            } catch (e: Exception) {
-                close()
-                val message = "Exception while creating rabbitMq channel"
-                logger.error(message, e)
-                throw e
-            }
-        }
-
-        fun close() {
-            try {
-                if (channel.isOpen) {
-                    channel.close()
-                }
-            } catch (e: Exception) {
-                logger.error("Exception closing RabbitMQ channel", e)
-            }
-            try {
-                if (connection.isOpen) {
-                    connection.close()
-                }
-            } catch (e: Exception) {
-                logger.error("Exception closing RabbitMQ connection for", e)
-            }
-            channelContext = null
-        }
     }
 }

@@ -22,6 +22,7 @@ import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.mq.queue.QueuesProcessor
 import com.exactpro.th2.pico.operator.repo.RepositoryContext
 import mu.KotlinLogging
+import kotlin.system.exitProcess
 
 const val EVENT_STORAGE_BOX_ALIAS = "estore"
 const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
@@ -32,8 +33,7 @@ const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
 private val logger = KotlinLogging.logger { }
 
 fun main(args: Array<String>) {
-    val mode = if (args.isNotEmpty()) args[0] else "full"
-    when (mode) {
+    when (val mode = if (args.isNotEmpty()) args[0] else "full") {
         "full" -> {
             ConfigHandler.clearOldConfigs()
             ConfigHandler.copyDefaultConfigs()
@@ -45,6 +45,7 @@ fun main(args: Array<String>) {
                 queuesProcessor.process(it)
             }
             queuesProcessor.removeUnusedQueues()
+            RabbitMQManager.closeChannel()
         }
         "queues" -> {
             RabbitMQManager.creteInitialSetup()
@@ -53,6 +54,7 @@ fun main(args: Array<String>) {
                 queuesProcessor.process(it)
             }
             queuesProcessor.removeUnusedQueues()
+            RabbitMQManager.closeChannel()
         }
         "configs" -> {
             ConfigHandler.clearOldConfigs()
@@ -66,4 +68,5 @@ fun main(args: Array<String>) {
             logger.error("Command line argument: {} is not supported", mode)
         }
     }
+    exitProcess(0)
 }
