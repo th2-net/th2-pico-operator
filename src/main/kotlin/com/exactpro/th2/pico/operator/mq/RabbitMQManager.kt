@@ -17,10 +17,6 @@
 package com.exactpro.th2.pico.operator.mq
 
 import com.exactpro.th2.model.latest.box.pins.PinSettings
-import com.exactpro.th2.pico.operator.EVENT_STORAGE_BOX_ALIAS
-import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
-import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
-import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
@@ -100,7 +96,6 @@ object RabbitMQManager {
         try {
             createUser()
             declareExchange()
-            createStoreQueues()
         } catch (e: Exception) {
             logger.error("Exception setting up rabbitMq for schema: \"{}\"", schema, e)
         }
@@ -142,33 +137,6 @@ object RabbitMQManager {
             logger.error("Exception setting up exchange: \"{}\"", schema, e)
             throw e
         }
-    }
-
-    private fun createStoreQueues() {
-        var declareResult = channel.queueDeclare(
-            Queue(
-                schema,
-                EVENT_STORAGE_BOX_ALIAS,
-                EVENT_STORAGE_PIN_ALIAS
-            ).toString(),
-            managementConfig.persistence,
-            false,
-            false,
-            null
-        )
-        logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
-        declareResult = channel.queueDeclare(
-            Queue(
-                schema,
-                MESSAGE_STORAGE_BOX_ALIAS,
-                MESSAGE_STORAGE_PIN_ALIAS
-            ).toString(),
-            managementConfig.persistence,
-            false,
-            false,
-            null
-        )
-        logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
     }
 
     private fun removeSchemaUser() {

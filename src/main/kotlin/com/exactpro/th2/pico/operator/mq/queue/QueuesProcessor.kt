@@ -16,6 +16,11 @@
 
 package com.exactpro.th2.pico.operator.mq.queue
 
+import com.exactpro.th2.pico.operator.EVENT_STORAGE_BOX_ALIAS
+import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
+import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
+import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PIN_ALIAS
+import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.rabbitmq.http.client.domain.QueueInfo
@@ -35,8 +40,11 @@ class QueuesProcessor {
     fun removeUnusedQueues() {
         val allQueues: List<QueueInfo> = RabbitMQManager.getAllQueues()
         val channel = RabbitMQManager.channel
-        allQueues.forEach {
-            val queueName = it.name
+        for (queue in allQueues) {
+            val queueName = queue.name
+            if (queueName == estoreQueue || queueName == mstoreQueue) {
+                continue
+            }
             if (!declaredQueues.contains(queueName)) {
                 try {
                     channel.queueDelete(queueName)
@@ -47,5 +55,41 @@ class QueuesProcessor {
                 }
             }
         }
+    }
+
+    fun createStoreQueues() {
+        val persistence = ConfigLoader.config.rabbitMQManagement.persistence
+        var declareResult = RabbitMQManager.channel.queueDeclare(
+            estoreQueue,
+            persistence,
+            false,
+            false,
+            null
+        )
+        logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
+        declareResult = RabbitMQManager.channel.queueDeclare(
+            mstoreQueue,
+            persistence,
+            false,
+            false,
+            null
+        )
+        logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
+    }
+
+    companion object {
+        val schema = ConfigLoader.config.schemaName
+
+        val estoreQueue = Queue(
+            schema,
+            EVENT_STORAGE_BOX_ALIAS,
+            EVENT_STORAGE_PIN_ALIAS
+        ).toString()
+
+        val mstoreQueue = Queue(
+            schema,
+            MESSAGE_STORAGE_BOX_ALIAS,
+            MESSAGE_STORAGE_PIN_ALIAS
+        ).toString()
     }
 }

@@ -40,6 +40,7 @@ fun main(args: Array<String>) {
             RabbitMQManager.creteInitialSetup()
 
             val queuesProcessor = QueuesProcessor()
+            queuesProcessor.createStoreQueues()
             RepositoryContext.boxResources.values.forEach {
                 ConfigProcessor(it).process()
                 queuesProcessor.process(it)
@@ -50,6 +51,7 @@ fun main(args: Array<String>) {
         "queues" -> {
             RabbitMQManager.creteInitialSetup()
             val queuesProcessor = QueuesProcessor()
+            queuesProcessor.createStoreQueues()
             RepositoryContext.boxResources.values.forEach {
                 queuesProcessor.process(it)
             }
