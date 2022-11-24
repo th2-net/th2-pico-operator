@@ -17,6 +17,7 @@
 package com.exactpro.th2.pico.operator.grpc.factory
 
 import com.exactpro.th2.model.latest.box.pins.GrpcClient
+import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.grpc.GrpcEndpointConfiguration
 import com.exactpro.th2.pico.operator.grpc.GrpcRouterConfiguration
 import com.exactpro.th2.pico.operator.grpc.GrpcServerConfiguration
@@ -31,7 +32,7 @@ class GrpcRouterConfigFactory {
         var server: GrpcServerConfiguration? = null
         val services: MutableMap<String, GrpcServiceConfiguration> = HashMap()
         if (resource.spec.pins?.grpc?.server?.isNotEmpty() == true) {
-            server = createServer()
+            server = createServer(getServerPort(resource.metadata.name))
         }
         val clientPins = resource.spec.pins?.grpc?.client ?: return GrpcRouterConfiguration(services, server)
 
@@ -51,9 +52,10 @@ class GrpcRouterConfigFactory {
         val serviceClass = currentPin.serviceClass
         val serviceName = currentPin.name
         var config = services[serviceName]
+        val serverPort = getServerPort(linkedBoxName)
         val endpoints = mutableMapOf(
             linkedBoxName + ENDPOINT_ALIAS_SUFFIX to
-                GrpcEndpointConfiguration(linkedBoxName, currentPin.attributes)
+                GrpcEndpointConfiguration(linkedBoxName, serverPort, currentPin.attributes)
         )
 
         if (config == null) {
@@ -70,14 +72,20 @@ class GrpcRouterConfigFactory {
         }
     }
 
-    private fun createServer(): GrpcServerConfiguration {
+    private fun getServerPort(serverName: String): Int {
+        val serverPort = serverPortMapping[serverName] ?: ConfigLoader.config.grpc.serverPorts.getPort()
+        serverPortMapping[serverName] = serverPort
+        return serverPort
+    }
+
+    private fun createServer(port: Int): GrpcServerConfiguration {
         return GrpcServerConfiguration(
-            DEFAULT_SERVER_WORKERS_COUNT, DEFAULT_PORT, null, null
+            DEFAULT_SERVER_WORKERS_COUNT, port, null, null
         )
     }
 
     companion object {
-        const val DEFAULT_PORT = 8080
+        val serverPortMapping: MutableMap<String, Int> = HashMap()
         private const val DEFAULT_SERVER_WORKERS_COUNT = 5
         private const val ENDPOINT_ALIAS_SUFFIX = "-endpoint"
     }

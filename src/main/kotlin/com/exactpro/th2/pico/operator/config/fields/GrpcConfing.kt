@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator.grpc
+package com.exactpro.th2.pico.operator.config.fields
 
-data class GrpcEndpointConfiguration(
-    val host: String,
-    val port: Int,
-    val attributes: List<String>? = null,
+import java.util.LinkedList
+import java.util.Queue
+
+data class GrpcConfig(
+    val serverPorts: GrpcServerPortsConfig = GrpcServerPortsConfig()
 )
+
+data class GrpcServerPortsConfig(
+    val start: Int = 0,
+    val end: Int = 0
+) {
+    private val availablePorts: Queue<Int> = LinkedList<Int>().apply {
+        addAll(start..end)
+    }
+
+    fun getPort(): Int = availablePorts.remove()
+}

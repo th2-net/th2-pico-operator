@@ -17,11 +17,13 @@
 package com.exactpro.th2.pico.operator.config
 
 import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
+import com.exactpro.th2.pico.operator.config.fields.GrpcConfig
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
 
 data class ApplicationConfig(
     val repoLocation: String,
     val schemaName: String,
     val rabbitMQManagement: RabbitMQManagementConfig,
+    val grpc: GrpcConfig,
     val defaultSchemaConfigs: DefaultSchemaConfigs
 )

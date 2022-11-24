@@ -31,7 +31,8 @@ class BoxConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
             fileName,
             mapOf(
                 "boxName" to resource.metadata.name,
-                "bookName" to bookName
+                "bookName" to bookName,
+                "image" to "${resource.spec.imageName}:${resource.spec.imageVersion}"
             )
         )
     }
