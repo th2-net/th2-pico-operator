@@ -23,8 +23,9 @@ import com.exactpro.th2.pico.operator.mq.factory.MqRouterConfigFactoryEstore
 import com.exactpro.th2.pico.operator.mq.factory.MqRouterConfigFactoryMstore
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.ResourceType
+import com.exactpro.th2.pico.operator.schemaName
 
-class MqConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class MqConfigHandler(private val resource: BoxResource) : ConfigHandler() {
 
     private val fileName = "${this.resource.metadata.name}/mq.json"
 

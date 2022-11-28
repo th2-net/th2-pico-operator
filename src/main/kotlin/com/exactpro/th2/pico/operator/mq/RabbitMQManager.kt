@@ -21,6 +21,7 @@ import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
 import com.exactpro.th2.pico.operator.mq.queue.Queue
+import com.exactpro.th2.pico.operator.schemaName
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.rabbitmq.http.client.Client
@@ -36,7 +37,6 @@ import kotlin.io.path.Path
 object RabbitMQManager {
     private val logger = KotlinLogging.logger { }
 
-    private val schema = ConfigLoader.config.schemaName
     private val managementConfig: RabbitMQManagementConfig = ConfigLoader.config.rabbitMQManagement
 
     private val client: Client = Client(
@@ -97,14 +97,14 @@ object RabbitMQManager {
             createUser()
             declareExchange()
         } catch (e: Exception) {
-            logger.error("Exception setting up rabbitMq for schema: \"{}\"", schema, e)
+            logger.error("Exception setting up rabbitMq for schema: \"{}\"", schemaName, e)
         }
     }
 
     private fun createUser() {
         val password = getUserPassword()
         val vHostName = managementConfig.vhostName
-        if (schema.isEmpty()) {
+        if (schemaName.isEmpty()) {
             return
         }
         try {
@@ -112,8 +112,8 @@ object RabbitMQManager {
                 logger.error("vHost: \"{}\" is not present", vHostName)
                 return
             }
-            client.createUser(schema, password.toCharArray(), ArrayList())
-            logger.info("Created user \"{}\" on vHost \"{}\"", schema, vHostName)
+            client.createUser(schemaName, password.toCharArray(), ArrayList())
+            logger.info("Created user \"{}\" on vHost \"{}\"", schemaName, vHostName)
 
             // set permissions
             val (configure, read, write) = managementConfig.schemaPermissions
@@ -121,10 +121,10 @@ object RabbitMQManager {
             permissions.configure = configure
             permissions.read = read
             permissions.write = write
-            client.updatePermissions(vHostName, schema, permissions)
-            logger.info("User \"{}\" permissions set in RabbitMQ", schema)
+            client.updatePermissions(vHostName, schemaName, permissions)
+            logger.info("User \"{}\" permissions set in RabbitMQ", schemaName)
         } catch (e: Exception) {
-            logger.error("Exception setting up user: \"{}\" for vHost: \"{}\"", schema, vHostName, e)
+            logger.error("Exception setting up user: \"{}\" for vHost: \"{}\"", schemaName, vHostName, e)
             throw e
         }
     }
@@ -132,9 +132,9 @@ object RabbitMQManager {
     private fun declareExchange() {
         val rabbitMQManagementConfig = managementConfig
         try {
-            channel.exchangeDeclare(schema, "direct", rabbitMQManagementConfig.persistence)
+            channel.exchangeDeclare(schemaName, "direct", rabbitMQManagementConfig.persistence)
         } catch (e: Exception) {
-            logger.error("Exception setting up exchange: \"{}\"", schema, e)
+            logger.error("Exception setting up exchange: \"{}\"", schemaName, e)
             throw e
         }
     }
@@ -145,15 +145,15 @@ object RabbitMQManager {
             logger.error("vHost: \"{}\" is not present", vHostName)
             return
         }
-        client.deleteUser(schema)
-        logger.info("Deleted user \"{}\" from vHost \"{}\"", schema, vHostName)
+        client.deleteUser(schemaName)
+        logger.info("Deleted user \"{}\" from vHost \"{}\"", schemaName, vHostName)
     }
 
     private fun removeSchemaExchange() {
         try {
-            channel.exchangeDelete(schema)
+            channel.exchangeDelete(schemaName)
         } catch (e: Exception) {
-            logger.error("Exception deleting exchange: \"{}\"", schema, e)
+            logger.error("Exception deleting exchange: \"{}\"", schemaName, e)
         }
     }
 
@@ -162,7 +162,7 @@ object RabbitMQManager {
             getAllQueues().forEach {
                 val queueName = it.name
                 val queue = Queue.fromString(queueName)
-                if (queue?.schemaName == schema) {
+                if (queue?.schemaName == schemaName) {
                     try {
                         channel.queueDelete(queueName)
                         logger.info("Deleted queue: [{}]", queueName)
@@ -172,7 +172,7 @@ object RabbitMQManager {
                 }
             }
         } catch (e: Exception) {
-            logger.error("Exception cleaning up queues for: \"{}\"", schema, e)
+            logger.error("Exception cleaning up queues for: \"{}\"", schemaName, e)
         }
     }
 

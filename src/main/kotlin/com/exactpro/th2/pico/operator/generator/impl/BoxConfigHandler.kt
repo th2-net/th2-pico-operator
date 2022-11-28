@@ -20,7 +20,7 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class BoxConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class BoxConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val fileName = "${this.resource.metadata.name}/box.json"
     private val defaultBookKey = "defaultBook"
 

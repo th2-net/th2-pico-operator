@@ -18,15 +18,14 @@ package com.exactpro.th2.pico.operator.generator
 
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
-import com.exactpro.th2.pico.operator.repo.BoxResource
+import com.exactpro.th2.pico.operator.configDir
 import com.exactpro.th2.pico.operator.util.Mapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.io.path.Path
 
-abstract class ConfigHandler(val resource: BoxResource) {
+abstract class ConfigHandler {
 
     abstract fun handle()
 
@@ -43,8 +42,6 @@ abstract class ConfigHandler(val resource: BoxResource) {
     }
 
     companion object {
-        val schemaName = ConfigLoader.config.schemaName
-        private val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
         private val defaultConfigsLocation = ConfigLoader.config.defaultSchemaConfigs.location
         private val defaultConfigNames = ConfigLoader.config.defaultSchemaConfigs.configNames
 
@@ -53,10 +50,15 @@ abstract class ConfigHandler(val resource: BoxResource) {
         }
 
         fun copyDefaultConfigs() {
-            val destinationPath = "$configDir/default/"
-            File(destinationPath).mkdirs()
-            ConfigLoader.config.defaultSchemaConfigs.configNames.values.forEach {
-                Files.copy(Path("$defaultConfigsLocation/$it"), Path("$destinationPath$it"))
+            val directories = File(configDir).listFiles() ?: return
+            directories.forEach { dir ->
+                if (dir.isDirectory) {
+                    ConfigLoader.config.defaultSchemaConfigs.configNames.values.forEach { file ->
+                        if (!File("$dir/$file").exists()) {
+                            Files.copy(Path("$defaultConfigsLocation/$file"), Path("$dir/$file"))
+                        }
+                    }
+                }
             }
         }
     }

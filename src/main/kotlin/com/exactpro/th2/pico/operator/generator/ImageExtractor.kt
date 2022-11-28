@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator.generator.impl
+package com.exactpro.th2.pico.operator.generator
 
-import com.exactpro.th2.pico.operator.generator.ConfigHandler
+import com.exactpro.th2.pico.operator.configDir
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import com.exactpro.th2.pico.operator.util.Mapper
+import java.io.File
+import java.nio.file.Files
 
-class LoggingConfigHandler(private val resource: BoxResource) : ConfigHandler() {
-    private val fileNames = listOf(
-        "${this.resource.metadata.name}/log4j2.properties",
-        "${this.resource.metadata.name}/log4j.properties",
-        "${this.resource.metadata.name}/log4py.conf",
-        "${this.resource.metadata.name}/log4cxx.properties",
-    )
+object ImageExtractor {
+    private val images: MutableMap<String, String> = HashMap()
 
-    override fun handle() {
-        val config = resource.spec.loggingConfig ?: return
-        fileNames.forEach {
-            saveConfigFle(it, config)
-        }
+    fun process(resource: BoxResource) {
+        images[resource.metadata.name] = "${resource.spec.imageName}:${resource.spec.imageVersion}"
+    }
+
+    fun saveImagesToFile() {
+        val file = File("$configDir/images.json")
+        file.parentFile.mkdirs()
+        Files.writeString(file.toPath(), Mapper.JSON_MAPPER.writeValueAsString(images))
     }
 }

@@ -17,6 +17,7 @@
 package com.exactpro.th2.pico.operator.repo
 
 import com.exactpro.th2.pico.operator.config.ConfigLoader
+import com.exactpro.th2.pico.operator.schemaName
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
@@ -30,7 +31,7 @@ object RepositoryLoader {
 
     private val logger = KotlinLogging.logger { }
 
-    private val schemaDir = "${ConfigLoader.config.repoLocation}/${ConfigLoader.config.schemaName}"
+    private val schemaDir = "${ConfigLoader.config.repoLocation}/$schemaName"
 
     private inline fun <reified T> loadCustomResourceFile(file: File): T {
         return YAML_MAPPER.readValue(Files.readString(file.toPath()))

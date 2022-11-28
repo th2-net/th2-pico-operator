@@ -23,6 +23,7 @@ import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import com.exactpro.th2.pico.operator.schemaName
 import com.rabbitmq.http.client.domain.QueueInfo
 import mu.KotlinLogging
 import java.io.IOException
@@ -78,16 +79,14 @@ class QueuesProcessor {
     }
 
     companion object {
-        val schema = ConfigLoader.config.schemaName
-
         val estoreQueue = Queue(
-            schema,
+            schemaName,
             EVENT_STORAGE_BOX_ALIAS,
             EVENT_STORAGE_PIN_ALIAS
         ).toString()
 
         val mstoreQueue = Queue(
-            schema,
+            schemaName,
             MESSAGE_STORAGE_BOX_ALIAS,
             MESSAGE_STORAGE_PIN_ALIAS
         ).toString()

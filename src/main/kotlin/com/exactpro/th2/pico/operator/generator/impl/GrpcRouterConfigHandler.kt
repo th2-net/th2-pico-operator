@@ -21,7 +21,7 @@ import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
 
-class GrpcRouterConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class GrpcRouterConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val fileName = "${this.resource.metadata.name}/grpc_router.json"
 
     override fun handle() {

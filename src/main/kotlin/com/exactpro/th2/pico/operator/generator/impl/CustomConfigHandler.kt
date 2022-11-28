@@ -19,7 +19,7 @@ package com.exactpro.th2.pico.operator.generator.impl
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class CustomConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class CustomConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val fileName = "${this.resource.metadata.name}/custom.json"
 
     override fun handle() {

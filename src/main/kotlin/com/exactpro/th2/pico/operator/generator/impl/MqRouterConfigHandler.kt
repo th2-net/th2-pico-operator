@@ -21,7 +21,7 @@ import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
 
-class MqRouterConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class MqRouterConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val fileName = "${this.resource.metadata.name}/mq_router.json"
 
     override fun handle() {

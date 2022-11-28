@@ -21,7 +21,7 @@ import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
 
-class CradleManagerConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class CradleManagerConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val fileName = "${this.resource.metadata.name}/cradle_manager.json"
 
     override fun handle() {

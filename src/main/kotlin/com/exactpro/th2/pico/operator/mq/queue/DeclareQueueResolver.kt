@@ -21,12 +21,12 @@ import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import com.exactpro.th2.pico.operator.schemaName
 import com.rabbitmq.client.Channel
 import mu.KotlinLogging
 
 class DeclareQueueResolver(val resource: BoxResource) {
     private val logger = KotlinLogging.logger { }
-    private val schemaName = ConfigLoader.config.schemaName
     private val resourceName = resource.metadata.name
 
     fun handle(): Set<String> {

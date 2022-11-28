@@ -25,7 +25,7 @@ import java.util.*
 import java.util.zip.GZIPOutputStream
 import kotlin.collections.HashSet
 
-class DictionaryConfigHandler(resource: BoxResource) : ConfigHandler(resource) {
+class DictionaryConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val logger = KotlinLogging.logger { }
 
     private val dictionariesDir = "${this.resource.metadata.name}/dictionaries"

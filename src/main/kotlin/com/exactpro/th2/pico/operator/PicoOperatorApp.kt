@@ -16,13 +16,14 @@
 
 package com.exactpro.th2.pico.operator
 
+import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.generator.ConfigProcessor
+import com.exactpro.th2.pico.operator.generator.ImageExtractor
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.mq.queue.QueuesProcessor
 import com.exactpro.th2.pico.operator.repo.RepositoryContext
 import mu.KotlinLogging
-import kotlin.system.exitProcess
 
 const val EVENT_STORAGE_BOX_ALIAS = "estore"
 const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
@@ -30,28 +31,35 @@ const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
 const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
 const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
 
+val schemaName = ConfigLoader.config.schemaName
+val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
+
 private val logger = KotlinLogging.logger { }
 
 fun main(args: Array<String>) {
     when (val mode = if (args.isNotEmpty()) args[0] else "full") {
         "full" -> {
             ConfigHandler.clearOldConfigs()
-            ConfigHandler.copyDefaultConfigs()
             RabbitMQManager.creteInitialSetup()
 
-            val queuesProcessor = QueuesProcessor()
-            queuesProcessor.createStoreQueues()
+            val queuesProcessor = QueuesProcessor().also {
+                it.createStoreQueues()
+            }
             RepositoryContext.boxResources.values.forEach {
                 ConfigProcessor(it).process()
+                ImageExtractor.process(it)
                 queuesProcessor.process(it)
             }
+            ConfigHandler.copyDefaultConfigs()
+            ImageExtractor.saveImagesToFile()
             queuesProcessor.removeUnusedQueues()
             RabbitMQManager.closeChannel()
         }
         "queues" -> {
             RabbitMQManager.creteInitialSetup()
-            val queuesProcessor = QueuesProcessor()
-            queuesProcessor.createStoreQueues()
+            val queuesProcessor = QueuesProcessor().also {
+                it.createStoreQueues()
+            }
             RepositoryContext.boxResources.values.forEach {
                 queuesProcessor.process(it)
             }
@@ -60,15 +68,15 @@ fun main(args: Array<String>) {
         }
         "configs" -> {
             ConfigHandler.clearOldConfigs()
-            ConfigHandler.copyDefaultConfigs()
-
             RepositoryContext.boxResources.values.forEach {
                 ConfigProcessor(it).process()
+                ImageExtractor.process(it)
             }
+            ConfigHandler.copyDefaultConfigs()
+            ImageExtractor.saveImagesToFile()
         }
         else -> {
             logger.error("Command line argument: {} is not supported", mode)
         }
     }
-    exitProcess(0)
 }

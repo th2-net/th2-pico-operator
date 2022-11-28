@@ -22,7 +22,6 @@ import com.exactpro.th2.pico.operator.generator.impl.CustomConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.DictionaryConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.GrpcConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.GrpcRouterConfigHandler
-import com.exactpro.th2.pico.operator.generator.impl.LoggingConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqRouterConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
@@ -35,7 +34,7 @@ class ConfigProcessor(resource: BoxResource) {
         add(DictionaryConfigHandler(resource))
         // DictionaryConfigHandler Has to come before CustomConfigHandler as it modifies values in custom config
         add(CustomConfigHandler(resource))
-        add(LoggingConfigHandler(resource))
+//        add(LoggingConfigHandler(resource))
         add(MqRouterConfigHandler(resource))
         add(GrpcRouterConfigHandler(resource))
         add(CradleManagerConfigHandler(resource))
