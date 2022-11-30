@@ -16,7 +16,11 @@
 
 package com.exactpro.th2.pico.operator.grpc
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 data class RoutingStrategy(
-    val name: String? = "robin",
+    @JsonIgnore val strategy: String?,
     val endpoints: MutableSet<String>
-)
+) {
+    val name = strategy ?: "robin"
+}
