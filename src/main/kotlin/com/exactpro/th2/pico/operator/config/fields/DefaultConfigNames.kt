@@ -23,8 +23,5 @@ enum class DefaultConfigNames {
     mqRouter,
     rabbitMQ,
     bookConfig,
-    log4cxx,
-    log4j2,
-    log4j,
-    log4py
+    prometheus
 }
