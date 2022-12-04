@@ -23,15 +23,15 @@ import java.io.File
 import java.nio.file.Files
 
 object ImageExtractor {
-    private val images: MutableMap<String, String> = HashMap()
+    private val images: MutableSet<String> = HashSet()
 
     fun process(resource: BoxResource) {
-        images[resource.metadata.name] = "${resource.spec.imageName}:${resource.spec.imageVersion}"
+        images.add("${resource.spec.imageName}:${resource.spec.imageVersion}")
     }
 
     fun saveImagesToFile() {
         val file = File("$configDir/images.json")
         file.parentFile.mkdirs()
-        Files.writeString(file.toPath(), Mapper.JSON_MAPPER.writeValueAsString(images))
+        Files.writeString(file.toPath(), Mapper.JSON_MAPPER.writeValueAsString(mapOf("images" to images)))
     }
 }
