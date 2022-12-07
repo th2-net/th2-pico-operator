@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator
+package com.exactpro.th2.pico.operator.mq
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
-import com.exactpro.th2.pico.operator.config.OperatorRunConfig
+import com.exactpro.th2.pico.operator.mq.queue.LinkDescription
+import com.fasterxml.jackson.annotation.JsonProperty
 
-const val EVENT_STORAGE_BOX_ALIAS = "estore"
-const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
+data class QueueConfiguration(
+    private val queue: LinkDescription,
+    var attributes: List<String>?,
+    val filters: List<Any>?
+) {
 
-const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
-const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
+    @get:JsonProperty("queue")
+    val queueName: String
+        get() = queue.queue.toString()
 
-val schemaName = ConfigLoader.config.schemaName
-val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
+    @get:JsonProperty("name")
+    val routerKeyName: String
+        get() = queue.routingKey.toString()
 
-fun main(args: Array<String>) {
-    PicoOperator.run(OperatorRunConfig(if (args.isNotEmpty()) args[0] else "full"))
+    @get:JsonProperty("exchange")
+    val exchange: String
+        get() = queue.exchange
 }

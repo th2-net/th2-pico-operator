@@ -1,18 +1,34 @@
 plugins {
     id "io.gitlab.arturbosch.detekt" version "${kotlin_detekt_version}"
     id "org.jetbrains.kotlin.jvm" version "${kotlin_version}"
+    id 'java'
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
+    id 'maven-publish'
+    id 'signing'
 }
 
 ext {
     kotlin_logging_version = '2.0.10'
-    jackson_module_kotlin_version = '2.13.2'
     slf4j_api_version = '2.0.3'
-    slf4j_impl_version = '2.19.0'
-    junit_jupiter_version = '5.9.0'
+    log4j_slf4j_impl_version = '2.19.0'
+    log4j_slf4j_core_version = '2.19.0'
+
+    rabbit_amqp_version = '5.16.0'
+    rabbit_http_version = '4.1.2'
+
+    commons_text_version = '1.10.0'
+
+    resource_model_version = "1.2.1"
+
     jackson_dataformat_version = '2.14.0'
+    jackson_module_kotlin_version = '2.13.2'
+
+    junit_jupiter_version = '5.9.0'
+    sharedDir          = file("${project.rootDir}/shared")
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'java'
 apply plugin: 'application'
 
 group = 'com.exactpro.th2'
@@ -34,7 +50,7 @@ repositories {
 }
 
 jar {
-    enabled = false
+    enabled = true
     manifest {
         attributes(
                 'Created-By': "${System.getProperty('java.version')} (${System.getProperty('java.vendor')})",
@@ -49,20 +65,133 @@ jar {
 }
 
 dependencies {
-
-    implementation "org.slf4j:slf4j-api:$slf4j_api_version"
-    implementation "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_impl_version"
-
+    implementation 'commons-cli:commons-cli:1.5.0'
+    implementation "org.slf4j:slf4j-api:${slf4j_api_version}"
+    implementation "org.apache.logging.log4j:log4j-slf4j2-impl:${log4j_slf4j_impl_version}"
+    implementation "org.apache.logging.log4j:log4j-core:${log4j_slf4j_impl_version}"
     implementation group: 'io.github.microutils', name: 'kotlin-logging', version: kotlin_logging_version
+
+    implementation "com.rabbitmq:amqp-client:${rabbit_amqp_version}"
+    implementation "com.rabbitmq:http-client:${rabbit_http_version}"
+
+    implementation "org.apache.commons:commons-text:${commons_text_version}"
+
+    implementation "com.exactpro.th2:th2-custom-resource-model:$resource_model_version"
 
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_dataformat_version"
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jackson_module_kotlin_version
+
     implementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
 
     testImplementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
     testImplementation group: 'org.jetbrains.kotlin', name: 'kotlin-test-junit5', version: kotlin_version
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$kotlin_detekt_version")
+}
+
+jar {
+    manifest {
+        attributes(
+                'Created-By':               "${System.getProperty('java.version')} (${System.getProperty('java.vendor')})",
+                'Specification-Title':      '',
+                'Specification-Vendor':     'Exactpro Systems LLC',
+                'Implementation-Title':     project.archivesBaseName,
+                'Implementation-Vendor':    'Exactpro Systems LLC',
+                'Implementation-Vendor-Id': 'com.exactpro',
+                'Implementation-Version':   project.version
+        )
+    }
+}
+
+// conditionals for publications
+tasks.withType(PublishToMavenRepository) {
+    onlyIf {
+        (repository == publishing.repositories.nexus &&
+                project.hasProperty('nexus_user') &&
+                project.hasProperty('nexus_password') &&
+                project.hasProperty('nexus_url')) ||
+                (repository == publishing.repositories.sonatype &&
+                        project.hasProperty('sonatypeUsername') &&
+                        project.hasProperty('sonatypePassword')) ||
+                (repository == publishing.repositories.local)
+    }
+}
+tasks.withType(Sign) {
+    onlyIf { project.hasProperty('signingKey') &&
+            project.hasProperty('signingPassword')
+    }
+}
+// disable running task 'initializeSonatypeStagingRepository' on a gitlab
+tasks.whenTaskAdded {task ->
+    if(task.name.equals('initializeSonatypeStagingRepository') &&
+            !(project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword'))
+    ) {
+        task.enabled = false
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
+            pom {
+                name = rootProject.name
+                packaging = 'jar'
+                description = rootProject.description
+                url = vcs_url
+                scm {
+                    url = vcs_url
+                }
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'developer'
+                        name = 'developer'
+                        email = 'developer@exactpro.com'
+                    }
+                }
+                scm {
+                    url = vcs_url
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'local'
+            url = sharedDir
+        }
+        //Nexus repo to publish from gitlab
+        maven {
+            name = 'nexus'
+            credentials {
+                username = project.findProperty('nexus_user')
+                password = project.findProperty('nexus_password')
+            }
+            url = project.findProperty('nexus_url')
+        }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}
+
+signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
 }
 
 detekt {

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator
+package com.exactpro.th2.pico.operator.config.fields
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
-import com.exactpro.th2.pico.operator.config.OperatorRunConfig
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
-const val EVENT_STORAGE_BOX_ALIAS = "estore"
-const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
+@JsonDeserialize
+data class RabbitMQNamespacePermissions(
+    val configure: String = DEFAULT_CONFIGURE_PERMISSION,
+    val read: String = DEFAULT_READ_PERMISSION,
+    val write: String = DEFAULT_WRITE_PERMISSION
+) {
 
-const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
-const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
-
-val schemaName = ConfigLoader.config.schemaName
-val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
-
-fun main(args: Array<String>) {
-    PicoOperator.run(OperatorRunConfig(if (args.isNotEmpty()) args[0] else "full"))
+    companion object {
+        const val DEFAULT_CONFIGURE_PERMISSION = ""
+        const val DEFAULT_READ_PERMISSION = ".*"
+        const val DEFAULT_WRITE_PERMISSION = ".*"
+    }
 }

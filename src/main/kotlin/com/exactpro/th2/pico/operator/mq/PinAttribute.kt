@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator
+package com.exactpro.th2.pico.operator.mq
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
-import com.exactpro.th2.pico.operator.config.OperatorRunConfig
-
-const val EVENT_STORAGE_BOX_ALIAS = "estore"
-const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
-
-const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
-const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
-
-val schemaName = ConfigLoader.config.schemaName
-val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
-
-fun main(args: Array<String>) {
-    PicoOperator.run(OperatorRunConfig(if (args.isNotEmpty()) args[0] else "full"))
+enum class PinAttribute {
+    raw, parsed, publish, subscribe, store, event
 }

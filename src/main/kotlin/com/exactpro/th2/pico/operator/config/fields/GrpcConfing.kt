@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator
+package com.exactpro.th2.pico.operator.config.fields
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
-import com.exactpro.th2.pico.operator.config.OperatorRunConfig
+import java.util.LinkedList
+import java.util.Queue
 
-const val EVENT_STORAGE_BOX_ALIAS = "estore"
-const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
+data class GrpcConfig(
+    val serverPorts: GrpcServerPortsConfig = GrpcServerPortsConfig()
+)
 
-const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
-const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
+data class GrpcServerPortsConfig(
+    val start: Int = 0,
+    val end: Int = 0
+) {
+    private val availablePorts: Queue<Int> = LinkedList<Int>().apply {
+        addAll(start..end)
+    }
 
-val schemaName = ConfigLoader.config.schemaName
-val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
-
-fun main(args: Array<String>) {
-    PicoOperator.run(OperatorRunConfig(if (args.isNotEmpty()) args[0] else "full"))
+    fun getPort(): Int = availablePorts.remove()
 }

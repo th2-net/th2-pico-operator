@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.pico.operator
+package com.exactpro.th2.pico.operator.generator.impl
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
-import com.exactpro.th2.pico.operator.config.OperatorRunConfig
+import com.exactpro.th2.pico.operator.generator.ConfigHandler
+import com.exactpro.th2.pico.operator.repo.BoxResource
 
-const val EVENT_STORAGE_BOX_ALIAS = "estore"
-const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
+class CustomConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+    private val fileName = "${this.resource.metadata.name}/custom.json"
 
-const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
-const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin"
-
-val schemaName = ConfigLoader.config.schemaName
-val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
-
-fun main(args: Array<String>) {
-    PicoOperator.run(OperatorRunConfig(if (args.isNotEmpty()) args[0] else "full"))
+    override fun handle() {
+        val config = resource.spec.customConfig ?: HashMap()
+        saveConfigFle(fileName, config)
+    }
 }
