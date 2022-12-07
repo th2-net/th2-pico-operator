@@ -16,11 +16,14 @@
 
 package com.exactpro.th2.pico.operator.generator.impl
 
+import com.exactpro.th2.pico.operator.configDir
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.RepositoryContext
 import mu.KotlinLogging
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.nio.file.Files
 import java.util.*
 import java.util.zip.GZIPOutputStream
 import kotlin.collections.HashSet
@@ -45,8 +48,14 @@ class DictionaryConfigHandler(private val resource: BoxResource) : ConfigHandler
                 continue
             }
             val compressedData = compressData(dictionary.spec.data)
-            saveConfigFle("$dictionariesDir/$dictionaryName", compressedData)
+            saveDictionary(dictionaryName, compressedData)
         }
+    }
+
+    private fun saveDictionary(fileName: String, data: String) {
+        val file = File("$configDir/$dictionariesDir/$fileName")
+        file.parentFile.mkdirs()
+        Files.writeString(file.toPath(), data)
     }
 
     @Suppress("UNCHECKED_CAST")
