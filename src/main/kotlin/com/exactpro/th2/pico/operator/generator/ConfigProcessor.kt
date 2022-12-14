@@ -26,12 +26,12 @@ import com.exactpro.th2.pico.operator.generator.impl.MqConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqRouterConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class ConfigProcessor(resource: BoxResource) {
+class ConfigProcessor(resource: BoxResource, isOldFormat: Boolean) {
     private val configHandlers: List<ConfigHandler> = ArrayList<ConfigHandler>().apply {
         add(MqConfigHandler(resource))
         add(BoxConfigHandler(resource))
         add(GrpcConfigHandler(resource))
-        add(DictionaryConfigHandler(resource))
+        add(DictionaryConfigHandler(resource, isOldFormat))
         // DictionaryConfigHandler Has to come before CustomConfigHandler as it modifies values in custom config
         add(CustomConfigHandler(resource))
 //        add(LoggingConfigHandler(resource))

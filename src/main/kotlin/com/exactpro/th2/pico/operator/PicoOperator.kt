@@ -37,7 +37,7 @@ object PicoOperator {
                     it.createStoreQueues()
                 }
                 RepositoryContext.boxResources.values.forEach {
-                    ConfigProcessor(it).process()
+                    ConfigProcessor(it, config.isOldFormat).process()
                     ImageExtractor.process(it)
                     queuesProcessor.process(it)
                 }
@@ -60,7 +60,7 @@ object PicoOperator {
             "configs" -> {
                 ConfigHandler.clearOldConfigs()
                 RepositoryContext.boxResources.values.forEach {
-                    ConfigProcessor(it).process()
+                    ConfigProcessor(it, config.isOldFormat).process()
                     ImageExtractor.process(it)
                 }
                 ConfigHandler.copyDefaultConfigs()

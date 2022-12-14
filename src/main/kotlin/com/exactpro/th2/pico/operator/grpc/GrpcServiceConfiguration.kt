@@ -17,8 +17,10 @@
 package com.exactpro.th2.pico.operator.grpc
 
 import com.exactpro.th2.model.latest.box.pins.FilterSpecGrpc
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class GrpcServiceConfiguration(
     val strategy: RoutingStrategy,
     @JsonProperty("service-class") val serviceClass: String,

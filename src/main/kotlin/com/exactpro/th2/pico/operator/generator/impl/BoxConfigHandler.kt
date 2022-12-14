@@ -32,7 +32,8 @@ class BoxConfigHandler(private val resource: BoxResource) : ConfigHandler() {
             mapOf(
                 "boxName" to resource.metadata.name,
                 "bookName" to bookName,
-                "image" to "${resource.spec.imageName}:${resource.spec.imageVersion}"
+                "image" to "${resource.spec.imageName}:${resource.spec.imageVersion}",
+                "resources" to resource.spec.extendedSettings?.resources
             )
         )
     }

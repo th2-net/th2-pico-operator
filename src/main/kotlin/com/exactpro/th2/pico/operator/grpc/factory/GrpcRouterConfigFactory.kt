@@ -67,6 +67,7 @@ class GrpcRouterConfigFactory {
             services[serviceName] = config
         } else {
             config.endpoints.putAll(endpoints)
+            // TODO grpc filters
 //            config.filters!!.addAll(currentPin.filters!!)
             config.strategy.endpoints.addAll(HashSet(endpoints.keys))
         }
