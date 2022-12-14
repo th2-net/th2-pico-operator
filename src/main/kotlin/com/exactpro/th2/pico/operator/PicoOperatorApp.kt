@@ -31,6 +31,6 @@ val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfig
 
 fun main(args: Array<String>) {
     val mode = if (args.isNotEmpty()) args[0] else "full"
-    val old = args.isNotEmpty() && args[1] == "old"
+    val old = args.size > 1 && args[1] == "old"
     PicoOperator.run(OperatorRunConfig(mode, old))
 }

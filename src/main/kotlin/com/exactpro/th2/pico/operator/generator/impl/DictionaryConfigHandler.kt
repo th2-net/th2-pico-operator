@@ -16,14 +16,10 @@
 
 package com.exactpro.th2.pico.operator.generator.impl
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.configDir
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.RepositoryContext
-import com.exactpro.th2.pico.operator.repo.ResourceType
-import com.exactpro.th2.pico.operator.schemaName
-import com.exactpro.th2.pico.operator.util.Mapper
 import mu.KotlinLogging
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -31,7 +27,6 @@ import java.nio.file.Files
 import java.util.*
 import java.util.zip.GZIPOutputStream
 import kotlin.collections.HashMap
-import kotlin.io.path.Path
 
 class DictionaryConfigHandler(private val resource: BoxResource, private val isOldFormat: Boolean) : ConfigHandler() {
     private val logger = KotlinLogging.logger { }
@@ -59,7 +54,7 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
             saveDictionaryOldFormat(pair.key, dictionaryName, compressedData)
         }
         if (isOldFormat) {
-            removeDictionariesSection()
+            customConfig.remove("dictionaries")
         }
     }
 
@@ -74,18 +69,6 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
         val file = File("$configDir/$dictionaryDir/$subDir/$fileName")
         file.parentFile.mkdirs()
         Files.writeString(file.toPath(), data)
-    }
-
-    private fun removeDictionariesSection() {
-        val customConfig = resource.spec.customConfig ?: return
-        if (!customConfig.containsKey("dictionaries")) {
-            return
-        }
-        customConfig.remove("dictionaries")
-        val kindPath = ResourceType.forKind(resource.kind)!!.path
-        val resourceStr = Mapper.YAML_MAPPER.writeValueAsString(resource)
-        val path = Path("${ConfigLoader.config.repoLocation}/$schemaName/$kindPath/${resource.metadata.name}.yml")
-        Files.writeString(path, resourceStr)
     }
 
     @Suppress("UNCHECKED_CAST")

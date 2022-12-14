@@ -16,13 +16,25 @@
 
 package com.exactpro.th2.pico.operator.generator.impl
 
+import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class BoxConfigHandler(private val resource: BoxResource) : ConfigHandler() {
-    private val fileName = "${this.resource.metadata.name}/box.json"
+class BoxAdditionalConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+    private val fileName = "${this.resource.metadata.name}/boxConfig.json"
+    private val defaultBookKey = "defaultBook"
 
     override fun handle() {
-        saveConfigFle(fileName, mapOf("boxName" to resource.metadata.name))
+        val default = loadDefaultConfig(DefaultConfigNames.bookConfig)
+        val bookName = resource.spec.bookName ?: default[defaultBookKey] as String
+        saveConfigFle(
+            fileName,
+            mapOf(
+                "boxName" to resource.metadata.name,
+                "bookName" to bookName,
+                "image" to "${resource.spec.imageName}:${resource.spec.imageVersion}",
+                "resources" to resource.spec.extendedSettings?.resources
+            )
+        )
     }
 }

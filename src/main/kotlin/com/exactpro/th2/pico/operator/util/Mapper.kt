@@ -37,6 +37,7 @@ object Mapper {
     val JSON_MAPPER: ObjectMapper = ObjectMapper(JsonFactory())
         .registerModule(KotlinModule.Builder().build())
         .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     fun mergeConfigs(defaults: Map<String, Any>, newData: Any): Map<String, Any> {
         val updater = JSON_MAPPER.readerForUpdating(defaults)
