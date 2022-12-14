@@ -44,7 +44,7 @@ class QueuesProcessor {
         val channel = RabbitMQManager.channel
         for (queue in allQueues) {
             val queueName = queue.name
-            if (queueName == estoreQueue || queueName == mstoreQueue) {
+            if (queueName == estoreQueue || queueName == mstoreQueue || queueName == mstoreParsedQueue) {
                 continue
             }
             if (!declaredQueues.contains(queueName)) {

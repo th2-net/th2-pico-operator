@@ -69,7 +69,7 @@ object RabbitMQManager {
         if (pinSettings == null) {
             return emptyMap()
         }
-        return if (pinSettings.storageOnDemand!!) {
+        return if (!pinSettings.storageOnDemand!!) {
             emptyMap()
         } else {
             val args: MutableMap<String, Any?> = HashMap()
