@@ -18,6 +18,7 @@ package com.exactpro.th2.pico.operator
 
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.OperatorRunConfig
+import kotlin.system.exitProcess
 
 const val EVENT_STORAGE_BOX_ALIAS = "estore"
 const val EVENT_STORAGE_PIN_ALIAS = "estore-pin"
@@ -33,4 +34,5 @@ fun main(args: Array<String>) {
     val mode = if (args.isNotEmpty()) args[0] else "full"
     val old = args.size > 1 && args[1] == "old"
     PicoOperator.run(OperatorRunConfig(mode, old))
+    exitProcess(0)
 }

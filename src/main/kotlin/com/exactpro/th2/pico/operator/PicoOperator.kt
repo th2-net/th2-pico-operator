@@ -72,5 +72,5 @@ object PicoOperator {
         }
     }
 
-    val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 }

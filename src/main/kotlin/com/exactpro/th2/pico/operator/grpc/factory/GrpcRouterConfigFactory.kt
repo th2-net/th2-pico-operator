@@ -55,7 +55,7 @@ class GrpcRouterConfigFactory {
         val serverPort = getServerPort(linkedBoxName)
         val endpoints = mutableMapOf(
             linkedBoxName + ENDPOINT_ALIAS_SUFFIX to
-                GrpcEndpointConfiguration(linkedBoxName, serverPort, currentPin.attributes)
+                GrpcEndpointConfiguration(serverPort, currentPin.attributes)
         )
 
         if (config == null) {
