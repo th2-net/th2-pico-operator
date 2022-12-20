@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("EnumEntryNameCase")
+
 package com.exactpro.th2.pico.operator.mq
 
 enum class PinAttribute {

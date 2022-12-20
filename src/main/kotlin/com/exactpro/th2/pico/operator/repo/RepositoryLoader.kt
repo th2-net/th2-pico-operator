@@ -53,6 +53,7 @@ object RepositoryLoader {
         return loadKind(ResourceType.Th2Dictionary, HashSet())
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private inline fun <reified T : CustomResource>loadKind(
         kind: ResourceType,
         firstOccurrences: MutableSet<String>
@@ -76,7 +77,9 @@ object RepositoryLoader {
                         if (!ResourceType.knownKinds().contains(resource.kind)) {
                             logger.error(
                                 "skipping \"{}\" | Unknown kind \"{}\". Known values are: \"{}\"",
-                                f.absolutePath, resource.kind, ResourceType.knownKinds()
+                                f.absolutePath,
+                                resource.kind,
+                                ResourceType.knownKinds()
                             )
                             continue
                         }
@@ -84,7 +87,9 @@ object RepositoryLoader {
                             logger.error(
                                 "skipping \"{}\" | resource is located in wrong directory. kind" +
                                     ": {}, dir:" + " {}",
-                                f.absolutePath, resource.kind, kind.path
+                                f.absolutePath,
+                                resource.kind,
+                                kind.path
                             )
                             continue
                         }
@@ -100,7 +105,8 @@ object RepositoryLoader {
                             // we already encountered resource with same name
                             // ignore both of them
                             logger.error(
-                                "Detected two resources with the same name: \"{}\" skipping both of them.", name,
+                                "Detected two resources with the same name: \"{}\" skipping both of them.",
+                                name,
                             )
                             resources.remove(name)
                             continue

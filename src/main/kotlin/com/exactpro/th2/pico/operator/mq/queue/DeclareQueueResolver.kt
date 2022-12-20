@@ -56,12 +56,17 @@ class DeclareQueueResolver(val resource: BoxResource) {
                 channel.queueDelete(queue)
             }
             val declareResult = channel.queueDeclare(
-                queue, persistence, false, false, newQueueArguments
+                queue,
+                persistence,
+                false,
+                false,
+                newQueueArguments
             )
             declaredQueues.add(queue)
             logger.info(
                 "Queue '{}' of resource {} was successfully declared",
-                declareResult.queue, resourceName
+                declareResult.queue,
+                resourceName
             )
         }
         return declaredQueues

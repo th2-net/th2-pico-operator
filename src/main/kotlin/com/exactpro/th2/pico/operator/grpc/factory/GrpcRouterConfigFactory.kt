@@ -38,7 +38,7 @@ class GrpcRouterConfigFactory {
 
         for (pin in clientPins) {
             for (link in pin.linkTo ?: continue) {
-                createService(pin, link.box, services)
+                createService(pin, link.box!!, services)
             }
         }
         return GrpcRouterConfiguration(services, server)
@@ -81,7 +81,10 @@ class GrpcRouterConfigFactory {
 
     private fun createServer(port: Int): GrpcServerConfiguration {
         return GrpcServerConfiguration(
-            DEFAULT_SERVER_WORKERS_COUNT, port, null, null
+            DEFAULT_SERVER_WORKERS_COUNT,
+            port,
+            null,
+            null
         )
     }
 
