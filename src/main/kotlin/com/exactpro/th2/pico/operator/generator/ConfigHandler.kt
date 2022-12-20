@@ -60,6 +60,14 @@ abstract class ConfigHandler {
                     }
                 }
             }
+            copyLogging()
+        }
+
+        private fun copyLogging() {
+            val files = File("${ConfigLoader.config.defaultSchemaConfigs.location}/logging").listFiles() ?: return
+            files.forEach {
+                Files.copy(it.toPath(), Path("$configDir/${it.name}"))
+            }
         }
     }
 }

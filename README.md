@@ -5,6 +5,8 @@
 4. pass appropriate arguments:
     * `full` for generating both configs and queues, `queues` for generating only queues, `configs` for generating only configs.
     * `old` optional argument for generating dictionaries in old format. leave empty for new format
+5. provide default configs for each box to be copied. bundle them in a separate directory. place logging files under `loggin` folder in this directory. 
+add path to location of default configs in pico operator config file.
 
 Generated configs will be placed in starting schema directory under `generatedConfigs` folder
 
@@ -39,8 +41,4 @@ defaultSchemaConfigs:
     grpcRouter: grpc_router.json
     mqRouter: mq_router.json
     rabbitMQ: rabbitMQ.json
-    log4cxx: log4cxx.properties
-    log4j2: log4j2.properties
-    log4j: log4j.properties
-    log4py: log4py.conf
 ```

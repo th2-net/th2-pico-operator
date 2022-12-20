@@ -36,7 +36,6 @@ class ConfigProcessor(resource: BoxResource, isOldFormat: Boolean) {
         add(DictionaryConfigHandler(resource, isOldFormat))
         // DictionaryConfigHandler Has to come before CustomConfigHandler as it modifies values in custom config
         add(CustomConfigHandler(resource))
-//        add(LoggingConfigHandler(resource))
         add(MqRouterConfigHandler(resource))
         add(GrpcRouterConfigHandler(resource))
         add(CradleManagerConfigHandler(resource))
