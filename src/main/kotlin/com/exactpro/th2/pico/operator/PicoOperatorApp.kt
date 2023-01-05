@@ -28,7 +28,7 @@ const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin-raw"
 const val MESSAGE_STORAGE_PARSED_PIN_ALIAS = "mstore-pin-parsed"
 
 val schemaName = ConfigLoader.config.schemaName
-val configDir = "${ConfigLoader.config.repoLocation}/$schemaName/generatedConfigs"
+val configDir = ConfigLoader.config.generatedConfigsLocation
 
 fun main(args: Array<String>) {
     val mode = if (args.isNotEmpty()) args[0] else "full"

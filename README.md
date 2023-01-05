@@ -8,12 +8,13 @@
 5. provide default configs for each box to be copied. bundle them in a separate directory. place logging files under `loggin` folder in this directory. 
 add path to location of default configs in pico operator config file.
 
-Generated configs will be placed in starting schema directory under `generatedConfigs` folder
+Generated configs will be placed in location specified by `generatedConfigsLocation` field in config
 
 pico-operator-config example:
 
 ```yaml
 repoLocation: location to schema configuration folder
+generatedConfigsLocation: location to place generated configs in
 schemaName: name for schema
 rabbitMQManagement:
   host: rabbit mq server host
