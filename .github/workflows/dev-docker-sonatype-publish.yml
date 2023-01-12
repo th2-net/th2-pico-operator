@@ -14,3 +14,5 @@ jobs:
       SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
       SONATYPE_GPG_ARMORED_KEY: ${{ secrets.SONATYPE_GPG_ARMORED_KEY }}
       SONATYPE_SIGNING_PASSWORD: ${{ secrets.SONATYPE_SIGNING_PASSWORD }}
+  owasp-scan:
+    uses: th2-net/.github/.github/workflows/owasp-gradle-scan.yml@main
