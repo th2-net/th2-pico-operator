@@ -27,7 +27,6 @@ import mu.KotlinLogging
 
 object PicoOperator {
     fun run(config: OperatorRunConfig) {
-
         when (val mode = config.mode) {
             "full" -> {
                 ConfigHandler.clearOldConfigs()

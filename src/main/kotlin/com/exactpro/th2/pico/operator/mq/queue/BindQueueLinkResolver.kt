@@ -101,7 +101,8 @@ class BindQueueLinkResolver(val resource: BoxResource) {
             channel.queueBind(queueName, queue.exchange, routingKeyName)
             logger.info(
                 "Queue '{}' successfully bound to '{}'",
-                queueName, routingKeyName
+                queueName,
+                routingKeyName
             )
         } catch (e: Exception) {
             val message = "Exception while working with rabbitMq"
