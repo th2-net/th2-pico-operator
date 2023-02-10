@@ -219,3 +219,8 @@ compileTestKotlin {
         jvmTarget = "11"
     }
 }
+
+
+dependencyLocking {
+    lockAllConfigurations()
+}
