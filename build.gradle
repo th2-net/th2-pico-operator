@@ -112,6 +112,12 @@ jar {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
 // conditionals for publications
 tasks.withType(PublishToMavenRepository) {
     onlyIf {
