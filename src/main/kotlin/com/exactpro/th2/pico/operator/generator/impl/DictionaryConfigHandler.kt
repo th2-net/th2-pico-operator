@@ -26,18 +26,20 @@ import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.zip.GZIPOutputStream
-import kotlin.collections.HashSet
+import kotlin.collections.HashMap
 
-class DictionaryConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+class DictionaryConfigHandler(private val resource: BoxResource, private val isOldFormat: Boolean) : ConfigHandler() {
     private val logger = KotlinLogging.logger { }
 
     private val dictionariesDir = "${this.resource.metadata.name}/dictionaries"
-    private val dictionaries: MutableSet<String> = HashSet()
+    private val dictionaryDir = "${this.resource.metadata.name}/dictionary"
+    private val dictionaries: MutableMap<String, String> = HashMap()
 
     override fun handle() {
         val customConfig = resource.spec.customConfig ?: return
         collectDictionaries(customConfig)
-        for (dictionaryName in dictionaries) {
+        for (pair in dictionaries.entries) {
+            val dictionaryName = pair.value
             val dictionary = RepositoryContext.dictionaries[dictionaryName]
             if (dictionary == null) {
                 logger.error(
@@ -49,11 +51,22 @@ class DictionaryConfigHandler(private val resource: BoxResource) : ConfigHandler
             }
             val compressedData = compressData(dictionary.spec.data)
             saveDictionary(dictionaryName, compressedData)
+            saveDictionaryOldFormat(pair.key, dictionaryName, compressedData)
+        }
+        if (isOldFormat) {
+            customConfig.remove("dictionaries")
         }
     }
 
     private fun saveDictionary(fileName: String, data: String) {
         val file = File("$configDir/$dictionariesDir/$fileName")
+        file.parentFile.mkdirs()
+        Files.writeString(file.toPath(), data)
+    }
+
+    // TODO temporary
+    private fun saveDictionaryOldFormat(subDir: String, fileName: String, data: String) {
+        val file = File("$configDir/$dictionaryDir/$subDir/$fileName")
         file.parentFile.mkdirs()
         Files.writeString(file.toPath(), data)
     }
@@ -65,7 +78,7 @@ class DictionaryConfigHandler(private val resource: BoxResource) : ConfigHandler
                 val matchGroups = DICTIONARY_LINK_REGEXP.find(value)?.groupValues ?: continue
                 val dictionaryName = matchGroups[1]
                 customConfig[key] = value.replace(matchGroups[0], dictionaryName)
-                dictionaries.add(dictionaryName)
+                dictionaries[key.lowercase()] = dictionaryName
             } else if (value is Map<*, *>) {
                 collectDictionaries(value as MutableMap<String, Any>)
             }

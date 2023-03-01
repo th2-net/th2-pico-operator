@@ -17,7 +17,7 @@
 package com.exactpro.th2.pico.operator.grpc
 
 data class GrpcEndpointConfiguration(
-    val host: String,
     val port: Int,
     val attributes: List<String>? = null,
+    val host: String = "localhost",
 )

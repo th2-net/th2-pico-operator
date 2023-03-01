@@ -16,13 +16,14 @@
 
 package com.exactpro.th2.pico.operator.mq
 
+import com.exactpro.th2.model.latest.box.pins.FilterSpecMq
 import com.exactpro.th2.pico.operator.mq.queue.LinkDescription
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class QueueConfiguration(
     private val queue: LinkDescription,
     var attributes: List<String>?,
-    val filters: List<Any>?
+    val filters: List<FilterSpecMq>?
 ) {
 
     @get:JsonProperty("queue")

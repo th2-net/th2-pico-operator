@@ -16,4 +16,4 @@
 
 package com.exactpro.th2.pico.operator.config
 
-data class OperatorRunConfig(val mode: String)
+data class OperatorRunConfig(val mode: String, val isOldFormat: Boolean)

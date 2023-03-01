@@ -16,7 +16,7 @@
 
 package com.exactpro.th2.pico.operator.mq.queue
 
-import com.exactpro.th2.model.v1.link.LinkEndpoint
+import com.exactpro.th2.model.latest.link.LinkEndpoint
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_BOX_ALIAS
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
@@ -101,7 +101,8 @@ class BindQueueLinkResolver(val resource: BoxResource) {
             channel.queueBind(queueName, queue.exchange, routingKeyName)
             logger.info(
                 "Queue '{}' successfully bound to '{}'",
-                queueName, routingKeyName
+                queueName,
+                routingKeyName
             )
         } catch (e: Exception) {
             val message = "Exception while working with rabbitMq"

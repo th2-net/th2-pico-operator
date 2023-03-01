@@ -22,6 +22,7 @@ import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
 
 data class ApplicationConfig(
     val repoLocation: String,
+    val generatedConfigsLocation: String,
     val schemaName: String,
     val rabbitMQManagement: RabbitMQManagementConfig,
     val grpc: GrpcConfig,

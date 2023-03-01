@@ -17,6 +17,7 @@
 package com.exactpro.th2.pico.operator.mq.factory
 
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
+import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PARSED_PIN_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.MessageRouterConfiguration
@@ -43,6 +44,15 @@ class MqRouterConfigFactoryMstore(val schemaName: String) : MqRouterConfigFactor
                 schemaName
             ),
             listOf(PinAttribute.subscribe.name, PinAttribute.raw.name),
+            emptyList()
+        )
+        queues[MESSAGE_STORAGE_PARSED_PIN_ALIAS] = QueueConfiguration(
+            LinkDescription(
+                Queue(schemaName, boxName, MESSAGE_STORAGE_PARSED_PIN_ALIAS),
+                RoutingKey.EMPTY,
+                schemaName
+            ),
+            listOf(PinAttribute.subscribe.name, PinAttribute.parsed.name),
             emptyList()
         )
 

@@ -38,7 +38,7 @@ class GrpcRouterConfigFactory {
 
         for (pin in clientPins) {
             for (link in pin.linkTo ?: continue) {
-                createService(pin, link.box, services)
+                createService(pin, link.box!!, services)
             }
         }
         return GrpcRouterConfiguration(services, server)
@@ -55,7 +55,7 @@ class GrpcRouterConfigFactory {
         val serverPort = getServerPort(linkedBoxName)
         val endpoints = mutableMapOf(
             linkedBoxName + ENDPOINT_ALIAS_SUFFIX to
-                GrpcEndpointConfiguration(linkedBoxName, serverPort, currentPin.attributes)
+                GrpcEndpointConfiguration(serverPort, currentPin.attributes)
         )
 
         if (config == null) {
@@ -67,6 +67,7 @@ class GrpcRouterConfigFactory {
             services[serviceName] = config
         } else {
             config.endpoints.putAll(endpoints)
+            // TODO grpc filters
 //            config.filters!!.addAll(currentPin.filters!!)
             config.strategy.endpoints.addAll(HashSet(endpoints.keys))
         }
@@ -80,7 +81,10 @@ class GrpcRouterConfigFactory {
 
     private fun createServer(port: Int): GrpcServerConfiguration {
         return GrpcServerConfiguration(
-            DEFAULT_SERVER_WORKERS_COUNT, port, null, null
+            DEFAULT_SERVER_WORKERS_COUNT,
+            port,
+            null,
+            null
         )
     }
 

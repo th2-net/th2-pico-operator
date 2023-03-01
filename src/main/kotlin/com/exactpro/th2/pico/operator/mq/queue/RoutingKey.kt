@@ -22,8 +22,8 @@ import com.exactpro.th2.pico.operator.mq.queue.AbstractName.Companion.PIN_NAME_R
 
 data class RoutingKey(
     val schemaName: String,
-    val boxName: String,
-    val pinName: String
+    val boxName: String?,
+    val pinName: String?
 ) : AbstractName {
 
     override fun toString(): String {
@@ -38,7 +38,7 @@ data class RoutingKey(
         val ROUTING_KEY_REGEXP =
             "$ROUTING_KEY_PREFIX\\[$NAMESPACE_REGEXP$BOX_NAME_REGEXP:$PIN_NAME_REGEXP]".toRegex()
 
-        fun format(schemaName: String, boxName: String, pinName: String): String {
+        fun format(schemaName: String, boxName: String?, pinName: String?): String {
             return if (schemaName == "" && boxName == "" && pinName == "") {
                 EMPTY_ROUTING_KEY
             } else {

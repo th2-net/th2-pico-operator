@@ -19,6 +19,7 @@ package com.exactpro.th2.pico.operator.mq.queue
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_BOX_ALIAS
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
+import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PARSED_PIN_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
@@ -43,7 +44,7 @@ class QueuesProcessor {
         val channel = RabbitMQManager.channel
         for (queue in allQueues) {
             val queueName = queue.name
-            if (queueName == estoreQueue || queueName == mstoreQueue) {
+            if (queueName == estoreQueue || queueName == mstoreQueue || queueName == mstoreParsedQueue) {
                 continue
             }
             if (!declaredQueues.contains(queueName)) {
@@ -60,6 +61,7 @@ class QueuesProcessor {
 
     fun createStoreQueues() {
         val persistence = ConfigLoader.config.rabbitMQManagement.persistence
+        val logMessage = "Queue \"{}\" was successfully declared"
         var declareResult = RabbitMQManager.channel.queueDeclare(
             estoreQueue,
             persistence,
@@ -67,7 +69,7 @@ class QueuesProcessor {
             false,
             null
         )
-        logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
+        logger.info(logMessage, declareResult.queue)
         declareResult = RabbitMQManager.channel.queueDeclare(
             mstoreQueue,
             persistence,
@@ -75,7 +77,15 @@ class QueuesProcessor {
             false,
             null
         )
-        logger.info("Queue \"{}\" was successfully declared", declareResult.queue)
+        logger.info(logMessage, declareResult.queue)
+        declareResult = RabbitMQManager.channel.queueDeclare(
+            mstoreParsedQueue,
+            persistence,
+            false,
+            false,
+            null
+        )
+        logger.info(logMessage, declareResult.queue)
     }
 
     companion object {
@@ -89,6 +99,12 @@ class QueuesProcessor {
             schemaName,
             MESSAGE_STORAGE_BOX_ALIAS,
             MESSAGE_STORAGE_PIN_ALIAS
+        ).toString()
+
+        val mstoreParsedQueue = Queue(
+            schemaName,
+            MESSAGE_STORAGE_BOX_ALIAS,
+            MESSAGE_STORAGE_PARSED_PIN_ALIAS
         ).toString()
     }
 }

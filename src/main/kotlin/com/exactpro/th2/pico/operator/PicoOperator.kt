@@ -27,7 +27,6 @@ import mu.KotlinLogging
 
 object PicoOperator {
     fun run(config: OperatorRunConfig) {
-
         when (val mode = config.mode) {
             "full" -> {
                 ConfigHandler.clearOldConfigs()
@@ -37,7 +36,7 @@ object PicoOperator {
                     it.createStoreQueues()
                 }
                 RepositoryContext.boxResources.values.forEach {
-                    ConfigProcessor(it).process()
+                    ConfigProcessor(it, config.isOldFormat).process()
                     ImageExtractor.process(it)
                     queuesProcessor.process(it)
                 }
@@ -60,7 +59,7 @@ object PicoOperator {
             "configs" -> {
                 ConfigHandler.clearOldConfigs()
                 RepositoryContext.boxResources.values.forEach {
-                    ConfigProcessor(it).process()
+                    ConfigProcessor(it, config.isOldFormat).process()
                     ImageExtractor.process(it)
                 }
                 ConfigHandler.copyDefaultConfigs()
@@ -72,5 +71,5 @@ object PicoOperator {
         }
     }
 
-    val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 }
