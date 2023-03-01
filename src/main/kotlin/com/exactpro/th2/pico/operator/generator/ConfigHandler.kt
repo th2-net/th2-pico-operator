@@ -19,7 +19,8 @@ package com.exactpro.th2.pico.operator.generator
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
 import com.exactpro.th2.pico.operator.configDir
-import com.exactpro.th2.pico.operator.util.Mapper
+import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
+import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import java.nio.file.Files
@@ -32,13 +33,13 @@ abstract class ConfigHandler {
     protected fun saveConfigFle(fileName: String, configContent: Any) {
         val file = File("$configDir/$fileName")
         file.parentFile.mkdirs()
-        val configContentStr = Mapper.JSON_MAPPER.writeValueAsString(configContent)
+        val configContentStr = JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(configContent)
         Files.writeString(file.toPath(), configContentStr)
     }
 
     fun loadDefaultConfig(configName: DefaultConfigNames): Map<String, Any> {
         val path = Path("$defaultConfigsLocation/${defaultConfigNames[configName]}")
-        return Mapper.YAML_MAPPER.readValue(Files.readString(path))
+        return YAML_MAPPER.readValue(Files.readString(path))
     }
 
     companion object {
@@ -59,6 +60,14 @@ abstract class ConfigHandler {
                         }
                     }
                 }
+            }
+            copyLogging()
+        }
+
+        private fun copyLogging() {
+            val files = File("${ConfigLoader.config.defaultSchemaConfigs.location}/logging").listFiles() ?: return
+            files.forEach {
+                Files.copy(it.toPath(), Path("$configDir/${it.name}"))
             }
         }
     }

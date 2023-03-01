@@ -16,6 +16,9 @@
 
 package com.exactpro.th2.pico.operator.grpc
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
+@JsonInclude(JsonInclude.Include.ALWAYS)
 data class GrpcServerConfiguration(
     val workers: Int,
     val port: Int,

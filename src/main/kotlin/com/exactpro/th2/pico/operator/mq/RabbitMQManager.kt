@@ -37,6 +37,9 @@ import kotlin.io.path.Path
 object RabbitMQManager {
     private val logger = KotlinLogging.logger { }
 
+    private const val defaultQueueLength = 1000
+    private const val defaultStrategy = "drop-head"
+
     private val managementConfig: RabbitMQManagementConfig = ConfigLoader.config.rabbitMQManagement
 
     private val client: Client = Client(
@@ -73,8 +76,8 @@ object RabbitMQManager {
             emptyMap()
         } else {
             val args: MutableMap<String, Any?> = HashMap()
-            args["x-max-length"] = pinSettings.queueLength
-            args["x-overflow"] = pinSettings.overloadStrategy
+            args["x-max-length"] = pinSettings.queueLength ?: defaultQueueLength
+            args["x-overflow"] = pinSettings.overloadStrategy ?: defaultStrategy
             args
         }
     }

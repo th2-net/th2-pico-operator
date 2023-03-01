@@ -9,19 +9,21 @@ plugins {
 
 ext {
     kotlin_logging_version = '2.0.10'
-    slf4j_api_version = '2.0.3'
+    slf4j_api_version = '2.0.5'
     log4j_slf4j_impl_version = '2.19.0'
     log4j_slf4j_core_version = '2.19.0'
 
     rabbit_amqp_version = '5.16.0'
-    rabbit_http_version = '4.1.2'
+    rabbit_http_version = '5.0.0'
 
     commons_text_version = '1.10.0'
 
-    resource_model_version = "1.2.1"
+    resource_model_version = '1.2.4'
 
-    jackson_dataformat_version = '2.14.0'
-    jackson_module_kotlin_version = '2.13.2'
+    fabric_version = '6.3.1'
+    commons_cli_version = '1.5.0'
+
+    jackson_module_kotlin_version = '2.14.0'
 
     junit_jupiter_version = '5.9.0'
     sharedDir          = file("${project.rootDir}/shared")
@@ -65,11 +67,14 @@ jar {
 }
 
 dependencies {
-    implementation 'commons-cli:commons-cli:1.5.0'
+    implementation "commons-cli:commons-cli:${commons_cli_version}"
+
     implementation "org.slf4j:slf4j-api:${slf4j_api_version}"
     implementation "org.apache.logging.log4j:log4j-slf4j2-impl:${log4j_slf4j_impl_version}"
     implementation "org.apache.logging.log4j:log4j-core:${log4j_slf4j_impl_version}"
     implementation group: 'io.github.microutils', name: 'kotlin-logging', version: kotlin_logging_version
+
+    implementation "io.fabric8:kubernetes-client:$fabric_version"
 
     implementation "com.rabbitmq:amqp-client:${rabbit_amqp_version}"
     implementation "com.rabbitmq:http-client:${rabbit_http_version}"
@@ -78,7 +83,6 @@ dependencies {
 
     implementation "com.exactpro.th2:th2-custom-resource-model:$resource_model_version"
 
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_dataformat_version"
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jackson_module_kotlin_version
 
     implementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
