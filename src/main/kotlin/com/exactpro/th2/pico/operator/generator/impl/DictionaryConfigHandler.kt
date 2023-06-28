@@ -23,7 +23,7 @@ import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.RepositoryContext
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.apache.commons.text.StringSubstitutor
 import org.apache.commons.text.lookup.StringLookup
@@ -32,16 +32,12 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
 import java.util.*
-import java.util.Map
 import java.util.zip.GZIPOutputStream
-import kotlin.collections.HashSet
-import kotlin.collections.MutableSet
 
 class DictionaryConfigHandler(private val resource: BoxResource, private val isOldFormat: Boolean) : ConfigHandler() {
     private val logger = KotlinLogging.logger { }
 
     private val dictionariesDir = "${this.resource.metadata.name}/dictionaries"
-    private val dictionaryDir = "${this.resource.metadata.name}/dictionary"
     private val dictionaries: MutableSet<String> = HashSet()
 
     override fun handle() {
@@ -59,7 +55,6 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
             }
             val compressedData = compressData(dictionary.spec.data)
             saveDictionary(dictionaryName, compressedData)
-            saveDictionaryOldFormat(pair.key, dictionaryName, compressedData)
         }
         if (isOldFormat) {
             customConfig.remove("dictionaries")
@@ -72,26 +67,17 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
         Files.writeString(file.toPath(), data)
     }
 
-    // TODO temporary
-    private fun saveDictionaryOldFormat(subDir: String, fileName: String, data: String) {
-        val file = File("$configDir/$dictionaryDir/$subDir/$fileName")
-        file.parentFile.mkdirs()
-        Files.writeString(file.toPath(), data)
-    }
-
     private fun collectDictionaries(spec: Spec) {
         val stringSubstitutor = StringSubstitutor(
             StringLookupFactory.INSTANCE.interpolatorStringLookup(
-                Map.of<String, StringLookup>(
-                    DICTIONARY_LINK_PREFIX,
-                    CustomLookupForDictionaries(dictionariesCollector)
+                mapOf(
+                    DICTIONARY_LINK_PREFIX to CustomLookupForDictionaries(dictionaries)
                 ), null, false
             )
         )
         try {
             val customConfigStr: String = YAML_MAPPER.writeValueAsString(spec.customConfig)
-            spec.customConfig = YAML_MAPPER.readValue(stringSubstitutor.replace(customConfigStr),
-                    object : TypeReference<T?>() {})
+            spec.customConfig = YAML_MAPPER.readValue(stringSubstitutor.replace(customConfigStr))
         } catch (e: JsonProcessingException) {
             throw RuntimeException(e)
         }
@@ -110,20 +96,16 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
     }
 
 
-    class CustomLookupForDictionaries(collector: MutableSet<String>) : StringLookup {
-        private val collector: MutableSet<DictionaryEntity>
-
-        init {
-            this.collector = collector
-        }
-
+    class CustomLookupForDictionaries(private val collector: MutableSet<String>) : StringLookup {
         override fun lookup(key: String): String {
-            collector.add(DictionaryEntity(key + DICTIONARY_SUFFIX, INITIAL_CHECKSUM))
+            collector.add(key + DICTIONARY_SUFFIX)
             return key + DICTIONARY_SUFFIX
         }
     }
 
     companion object {
         private const val DICTIONARY_LINK_PREFIX = "dictionary_link"
+        private const val DICTIONARY_SUFFIX = "-dictionary"
+
     }
 }
