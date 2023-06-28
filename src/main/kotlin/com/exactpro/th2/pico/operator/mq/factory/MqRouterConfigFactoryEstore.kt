@@ -26,11 +26,11 @@ import com.exactpro.th2.pico.operator.mq.queue.Queue
 import com.exactpro.th2.pico.operator.mq.queue.RoutingKey
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class MqRouterConfigFactoryEstore(val schemaName: String) : MqRouterConfigFactory {
+class MqRouterConfigFactoryEstore(schemaName: String) : MqRouterConfigFactory(schemaName) {
 
     @Override
     override fun createConfig(resource: BoxResource): MessageRouterConfiguration {
-        val queues: MutableMap<String, QueueConfiguration> = HashMap()
+        val queues: MutableMap<String, QueueConfiguration> = generateDeclaredQueues(resource)
         val boxName = resource.metadata.name
 
         // add event storage pin config for each resource

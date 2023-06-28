@@ -21,7 +21,8 @@ enum class ResourceType(val kind: String, val path: String) {
     Th2CoreBox("Th2CoreBox", "core"),
     Th2Mstore("Th2Mstore", "core"),
     Th2Estore("Th2Estore", "core"),
-    Th2Box("Th2Box", "boxes");
+    Th2Box("Th2Box", "boxes"),
+    Th2Job("Th2Job", "jobs");
 
     companion object {
         private val kinds: MutableMap<String, ResourceType> = HashMap()

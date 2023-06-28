@@ -40,7 +40,8 @@ class MqConfigHandler(private val resource: BoxResource) : ConfigHandler() {
             ResourceType.Th2Estore to MqRouterConfigFactoryEstore(schemaName),
             ResourceType.Th2Mstore to MqRouterConfigFactoryMstore(schemaName),
             ResourceType.Th2Box to MqRouterConfigFactoryBox(schemaName),
-            ResourceType.Th2CoreBox to MqRouterConfigFactoryBox(schemaName)
+            ResourceType.Th2CoreBox to MqRouterConfigFactoryBox(schemaName),
+            ResourceType.Th2Job to MqRouterConfigFactoryBox(schemaName)
         )
     }
 }

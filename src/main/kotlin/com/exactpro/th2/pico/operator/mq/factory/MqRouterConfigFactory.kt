@@ -25,8 +25,8 @@ import com.exactpro.th2.pico.operator.mq.queue.Queue
 import com.exactpro.th2.pico.operator.mq.queue.RoutingKey
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-interface MqRouterConfigFactory {
-    fun createConfig(resource: BoxResource): MessageRouterConfiguration
+abstract class MqRouterConfigFactory(val schemaName: String) {
+    abstract fun createConfig(resource: BoxResource): MessageRouterConfiguration
 
     fun generatePublishToEstorePin(schemaName: String, boxName: String) = QueueConfiguration(
         LinkDescription(
@@ -37,4 +37,45 @@ interface MqRouterConfigFactory {
         listOf(PinAttribute.publish.name, PinAttribute.event.name),
         emptyList()
     )
+
+    fun generateDeclaredQueues(
+        resource: BoxResource
+    ): MutableMap<String, QueueConfiguration> {
+        val queues: MutableMap<String, QueueConfiguration> = HashMap()
+        val boxName = resource.metadata.name
+
+        // add configurations for the rest of the pins
+        for ((pinName, attributes, filters) in resource.spec.pins?.mq?.publishers ?: ArrayList()) {
+            queues[pinName] = QueueConfiguration(
+                LinkDescription(
+                    Queue.EMPTY,
+                    RoutingKey(schemaName, boxName, pinName),
+                    schemaName
+                ),
+                attributes?.let {
+                    ArrayList(it).apply {
+                        add(PinAttribute.publish.name)
+                    }
+                },
+                filters
+            )
+        }
+
+        for ((pinName, attributes, filters) in resource.spec.pins?.mq?.subscribers ?: ArrayList()) {
+            queues[pinName] = QueueConfiguration(
+                LinkDescription(
+                    Queue(schemaName, boxName, pinName),
+                    RoutingKey.EMPTY,
+                    schemaName
+                ),
+                attributes?.let {
+                    ArrayList(it).apply {
+                        add(PinAttribute.subscribe.name)
+                    }
+                },
+                filters
+            )
+        }
+        return queues
+    }
 }

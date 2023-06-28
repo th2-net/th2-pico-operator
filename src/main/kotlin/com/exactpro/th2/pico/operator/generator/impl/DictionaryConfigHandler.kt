@@ -22,7 +22,6 @@ import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.RepositoryContext
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.apache.commons.text.StringSubstitutor
@@ -72,15 +71,13 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
             StringLookupFactory.INSTANCE.interpolatorStringLookup(
                 mapOf(
                     DICTIONARY_LINK_PREFIX to CustomLookupForDictionaries(dictionaries)
-                ), null, false
+                ),
+                null,
+                false
             )
         )
-        try {
-            val customConfigStr: String = YAML_MAPPER.writeValueAsString(spec.customConfig)
-            spec.customConfig = YAML_MAPPER.readValue(stringSubstitutor.replace(customConfigStr))
-        } catch (e: JsonProcessingException) {
-            throw RuntimeException(e)
-        }
+        val customConfigStr: String = YAML_MAPPER.writeValueAsString(spec.customConfig)
+        spec.customConfig = YAML_MAPPER.readValue(stringSubstitutor.replace(customConfigStr))
     }
 
     private fun compressData(value: String): String {
@@ -95,17 +92,14 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
         }
     }
 
-
     class CustomLookupForDictionaries(private val collector: MutableSet<String>) : StringLookup {
         override fun lookup(key: String): String {
-            collector.add(key + DICTIONARY_SUFFIX)
-            return key + DICTIONARY_SUFFIX
+            collector.add(key)
+            return key
         }
     }
 
     companion object {
         private const val DICTIONARY_LINK_PREFIX = "dictionary_link"
-        private const val DICTIONARY_SUFFIX = "-dictionary"
-
     }
 }
