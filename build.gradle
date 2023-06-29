@@ -82,12 +82,9 @@ dependencies {
     implementation "com.rabbitmq:amqp-client:${rabbit_amqp_version}"
     implementation "com.rabbitmq:http-client:${rabbit_http_version}"
 
-
     implementation "com.exactpro.th2:th2-custom-resource-model:$resource_model_version"
 
-
-    implementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
-
+    testImplementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
     testImplementation group: 'org.jetbrains.kotlin', name: 'kotlin-test-junit5', version: kotlin_version
 
