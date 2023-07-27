@@ -16,8 +16,6 @@
 
 package com.exactpro.th2.pico.operator.mq.queue
 
-import com.exactpro.th2.pico.operator.EVENT_STORAGE_BOX_ALIAS
-import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.repo.BoxResource
@@ -30,9 +28,6 @@ class DeclareQueueResolver(val resource: BoxResource) {
     private val resourceName = resource.metadata.name
 
     fun handle(): Set<String> {
-        if (resourceName == EVENT_STORAGE_BOX_ALIAS || resourceName == MESSAGE_STORAGE_BOX_ALIAS) {
-            return HashSet()
-        }
         try {
             return declareQueues()
         } catch (e: Exception) {
