@@ -33,6 +33,10 @@ grpc:
   serverPorts:
     start: starting port number
     end: ending port number
+prometheus:
+   enabled: true or false - default true
+   start: starting port number
+   end: ending port number
 defaultSchemaConfigs:
   location: location for default configs that should be copied for each schema
   configNames: map of <configName, configFileName.extension> for default configs that are needed for each schema

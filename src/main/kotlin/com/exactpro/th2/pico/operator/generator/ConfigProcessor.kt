@@ -25,6 +25,7 @@ import com.exactpro.th2.pico.operator.generator.impl.GrpcConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.GrpcRouterConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqRouterConfigHandler
+import com.exactpro.th2.pico.operator.generator.impl.PrometheusConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
 class ConfigProcessor(resource: BoxResource, isOldFormat: Boolean) {
@@ -39,6 +40,7 @@ class ConfigProcessor(resource: BoxResource, isOldFormat: Boolean) {
         add(MqRouterConfigHandler(resource))
         add(GrpcRouterConfigHandler(resource))
         add(CradleManagerConfigHandler(resource))
+        add(PrometheusConfigHandler(resource))
     }
 
     fun process() {

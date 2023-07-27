@@ -18,6 +18,7 @@ package com.exactpro.th2.pico.operator.config
 
 import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.config.fields.GrpcConfig
+import com.exactpro.th2.pico.operator.config.fields.PrometheusPortsConfig
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
 
 data class ApplicationConfig(
@@ -26,5 +27,6 @@ data class ApplicationConfig(
     val schemaName: String,
     val rabbitMQManagement: RabbitMQManagementConfig,
     val grpc: GrpcConfig,
+    val prometheus: PrometheusPortsConfig,
     val defaultSchemaConfigs: DefaultSchemaConfigs
 )
