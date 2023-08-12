@@ -1,3 +1,6 @@
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.render.JsonReportRenderer
+
 plugins {
     id "io.gitlab.arturbosch.detekt" version "${kotlin_detekt_version}"
     id "org.jetbrains.kotlin.jvm" version "${kotlin_version}"
@@ -6,6 +9,8 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id "org.owasp.dependencycheck" version "${owaspVersion}"
+    id 'com.github.jk1.dependency-license-report' version "${licenseReportVersion}"
+    id "de.undercouch.download" version "${downloadVersion}"
 }
 
 ext {
@@ -123,7 +128,7 @@ java {
 
 
 // conditionals for publications
-tasks.withType(PublishToMavenRepository) {
+tasks.withType(PublishToMavenRepository).configureEach {
     onlyIf {
         (repository == publishing.repositories.nexus &&
                 project.hasProperty('nexus_user') &&
@@ -135,13 +140,14 @@ tasks.withType(PublishToMavenRepository) {
                 (repository == publishing.repositories.local)
     }
 }
-tasks.withType(Sign) {
-    onlyIf { project.hasProperty('signingKey') &&
-            project.hasProperty('signingPassword')
+tasks.withType(Sign).configureEach {
+    onlyIf {
+        project.hasProperty('signingKey') &&
+                project.hasProperty('signingPassword')
     }
 }
 // disable running task 'initializeSonatypeStagingRepository' on a gitlab
-tasks.whenTaskAdded {task ->
+tasks.configureEach { task ->
     if(task.name.equals('initializeSonatypeStagingRepository') &&
             !(project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword'))
     ) {
@@ -207,8 +213,8 @@ nexusPublishing {
 }
 
 signing {
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
+    String signingKey = findProperty("signingKey")
+    String signingPassword = findProperty("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }
@@ -238,4 +244,25 @@ compileTestKotlin {
 
 dependencyLocking {
     lockAllConfigurations()
+}
+
+licenseReport {
+    def licenseNormalizerBundlePath = "$buildDir/license-normalizer-bundle.json"
+
+    if (!file(licenseNormalizerBundlePath).exists()) {
+        download.run {
+            src 'https://raw.githubusercontent.com/th2-net/.github/main/license-compliance/gradle-license-report/license-normalizer-bundle.json'
+            dest "$buildDir/license-normalizer-bundle.json"
+            overwrite false
+        }
+    }
+
+    filters = [
+            new LicenseBundleNormalizer(licenseNormalizerBundlePath, false)
+    ]
+    renderers = [
+            new JsonReportRenderer('licenses.json', false),
+    ]
+    excludeOwnGroup = false
+    allowedLicensesFile = new URL("https://raw.githubusercontent.com/th2-net/.github/main/license-compliance/gradle-license-report/allowed-licenses.json")
 }
