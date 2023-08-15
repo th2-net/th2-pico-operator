@@ -18,9 +18,7 @@ ext {
     rabbit_amqp_version = '5.16.0'
     rabbit_http_version = '5.0.0'
     resource_model_version = '1.3.3'
-    fabric_version = '6.8.0'
-    okhttp_version = '4.11.0'
-    okio_version = '3.5.0'
+    fabric_version = '6.6.2'
     junit_jupiter_version = '5.9.0'
     snakeyaml_version = '2.0'
 }
@@ -69,7 +67,7 @@ configurations.configureEach() {
 }
 
 dependencies {
-    api platform('com.exactpro.th2:bom:4.5.0-TH2-5035-+')
+    api platform('com.exactpro.th2:bom:4.5.0')
 
     implementation "commons-cli:commons-cli"
     implementation "org.apache.commons:commons-text"
@@ -80,15 +78,18 @@ dependencies {
     implementation group: 'io.github.microutils', name: 'kotlin-logging', version: kotlin_logging_version
 
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
 
-    implementation "com.squareup.okhttp3:okhttp:${okhttp_version}"
-    implementation "com.squareup.okio:okio:${okio_version}"
-    implementation "io.fabric8:kubernetes-client:$fabric_version"
+    implementation("io.fabric8:kubernetes-client:$fabric_version") {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
 
     implementation "com.rabbitmq:amqp-client:${rabbit_amqp_version}"
     implementation "com.rabbitmq:http-client:${rabbit_http_version}"
 
-    implementation "com.exactpro.th2:th2-custom-resource-model:$resource_model_version"
+    implementation("com.exactpro.th2:th2-custom-resource-model:$resource_model_version") {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
 
     testImplementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter:$junit_jupiter_version"
