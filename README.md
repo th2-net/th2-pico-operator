@@ -1,4 +1,4 @@
-### Local Run
+### Local Run (1.3.0)
 1. clone pico-operator repo
 2. build code using `gradle build` command
 3. run with `"-Dconverter.config=./path/to/pico-operator-config"`
@@ -47,3 +47,14 @@ defaultSchemaConfigs:
     mqRouter: mq_router.json
     rabbitMQ: rabbitMQ.json
 ```
+
+# Release notes
+
+## 1.3.0
+
+### Updated:
++ bom: `4.4.0-dev` to `4.5.0-dev`
++ kotlin: `1.8.22`
++ kubernetes-client: `6.1.1` to `6.8.0`
+   + okhttp: `4.10.0` to `4.11.0`
+   + okio: `3.0.0` to `3.5.0`
