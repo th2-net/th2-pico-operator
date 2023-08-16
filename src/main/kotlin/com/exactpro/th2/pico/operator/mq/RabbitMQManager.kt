@@ -115,7 +115,7 @@ object RabbitMQManager {
                 logger.error("vHost: \"{}\" is not present", vHostName)
                 return
             }
-            client.createUser(schemaName, password.toCharArray(), ArrayList())
+            client.createUser(schemaName, password.toCharArray(), emptyList())
             logger.info("Created user \"{}\" on vHost \"{}\"", schemaName, vHostName)
 
             // set permissions

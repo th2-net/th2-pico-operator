@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.exactpro.th2.pico.operator.mq.queue
 
+import com.exactpro.th2.model.latest.box.pins.MqPublisher
 import com.exactpro.th2.model.latest.link.LinkEndpoint
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_BOX_ALIAS
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
@@ -46,7 +47,7 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         val subscribers = resource.spec.pins?.mq?.subscribers ?: return
         for (subscriberPin in subscribers) {
             val queue = Queue(schemaName, resourceName, subscriberPin.name)
-            val currentPinLinks = subscriberPin.linkTo ?: emptyList()
+            val currentPinLinks: List<LinkEndpoint> = subscriberPin.linkTo ?: emptyList()
             for ((box, pin) in currentPinLinks) {
                 val linkDescription = LinkDescription(
                     queue,
@@ -71,7 +72,7 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         // create message store link for only resources that need it
         val currentLinks: MutableList<LinkEndpoint> = ArrayList()
         val mstoreQueue = Queue(schemaName, MESSAGE_STORAGE_BOX_ALIAS, MESSAGE_STORAGE_PIN_ALIAS)
-        val publishers = resource.spec.pins?.mq?.publishers ?: emptyList()
+        val publishers: List<MqPublisher> = resource.spec.pins?.mq?.publishers ?: emptyList()
         for ((pinName, attributes) in publishers) {
             if (attributes?.contains(PinAttribute.store.name) == true &&
                 attributes.contains(PinAttribute.raw.name) &&
