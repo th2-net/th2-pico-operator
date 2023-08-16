@@ -45,7 +45,7 @@ abstract class MqRouterConfigFactory(val schemaName: String) {
         val boxName = resource.metadata.name
 
         // add configurations for the rest of the pins
-        for ((pinName, attributes, filters) in resource.spec.pins?.mq?.publishers ?: ArrayList()) {
+        for ((pinName, attributes, filters) in resource.spec.pins?.mq?.publishers ?: emptyList()) {
             queues[pinName] = QueueConfiguration(
                 LinkDescription(
                     Queue.EMPTY,
@@ -61,7 +61,7 @@ abstract class MqRouterConfigFactory(val schemaName: String) {
             )
         }
 
-        for ((pinName, attributes, filters) in resource.spec.pins?.mq?.subscribers ?: ArrayList()) {
+        for ((pinName, attributes, filters) in resource.spec.pins?.mq?.subscribers ?: emptyList()) {
             queues[pinName] = QueueConfiguration(
                 LinkDescription(
                     Queue(schemaName, boxName, pinName),

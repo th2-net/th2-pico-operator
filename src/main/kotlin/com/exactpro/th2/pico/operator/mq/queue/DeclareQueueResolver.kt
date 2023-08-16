@@ -42,7 +42,7 @@ class DeclareQueueResolver(val resource: BoxResource) {
         val channel: Channel = RabbitMQManager.channel
         val persistence: Boolean = ConfigLoader.config.rabbitMQManagement.persistence
         // get queues that are associated with current box and are not linked through Th2Link resources
-        for (pin in resource.spec.pins?.mq?.subscribers ?: ArrayList()) {
+        for (pin in resource.spec.pins?.mq?.subscribers ?: emptyList()) {
             val queue: String = Queue(schemaName, resourceName, pin.name).toString()
             val newQueueArguments = RabbitMQManager.generateQueueArguments(pin.settings)
             val currentQueue = RabbitMQManager.getQueue(queue)

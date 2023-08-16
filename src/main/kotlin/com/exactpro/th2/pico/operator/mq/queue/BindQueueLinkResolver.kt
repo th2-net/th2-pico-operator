@@ -46,7 +46,7 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         val subscribers = resource.spec.pins?.mq?.subscribers ?: return
         for (subscriberPin in subscribers) {
             val queue = Queue(schemaName, resourceName, subscriberPin.name)
-            val currentPinLinks = subscriberPin.linkTo ?: ArrayList()
+            val currentPinLinks = subscriberPin.linkTo ?: emptyList()
             for ((box, pin) in currentPinLinks) {
                 val linkDescription = LinkDescription(
                     queue,
@@ -71,7 +71,7 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         // create message store link for only resources that need it
         val currentLinks: MutableList<LinkEndpoint> = ArrayList()
         val mstoreQueue = Queue(schemaName, MESSAGE_STORAGE_BOX_ALIAS, MESSAGE_STORAGE_PIN_ALIAS)
-        val publishers = resource.spec.pins?.mq?.publishers ?: ArrayList()
+        val publishers = resource.spec.pins?.mq?.publishers ?: emptyList()
         for ((pinName, attributes) in publishers) {
             if (attributes?.contains(PinAttribute.store.name) == true &&
                 attributes.contains(PinAttribute.raw.name) &&
