@@ -58,9 +58,6 @@ defaultSchemaConfigs:
 ## Feature:
 + added log4j2Config, log4pyConfig, zeroLogConfig config names
 
-## Fix:
-+ used debug log level for printing detail information about run component
-
 ## 1.3.0
 
 ### Updated:
