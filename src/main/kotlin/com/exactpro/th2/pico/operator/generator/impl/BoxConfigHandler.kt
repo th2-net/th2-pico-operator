@@ -23,6 +23,6 @@ class BoxConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     private val fileName = "${this.resource.metadata.name}/box.json"
 
     override fun handle() {
-        saveConfigFle(fileName, mapOf("boxName" to resource.metadata.name))
+        saveConfigFile(fileName, mapOf("boxName" to resource.metadata.name))
     }
 }

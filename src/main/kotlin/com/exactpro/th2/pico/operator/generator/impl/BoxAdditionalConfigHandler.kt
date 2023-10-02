@@ -27,7 +27,7 @@ class BoxAdditionalConfigHandler(private val resource: BoxResource) : ConfigHand
     override fun handle() {
         val default = loadDefaultConfig(DefaultConfigNames.bookConfig)
         val bookName = resource.spec.bookName ?: default[defaultBookKey] as String
-        saveConfigFle(
+        saveConfigFile(
             fileName,
             mapOf(
                 "boxName" to resource.metadata.name,

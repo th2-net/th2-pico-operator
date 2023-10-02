@@ -24,6 +24,6 @@ class CustomConfigHandler(private val resource: BoxResource) : ConfigHandler() {
 
     override fun handle() {
         val config = resource.spec.customConfig ?: HashMap()
-        saveConfigFle(fileName, config)
+        saveConfigFile(fileName, config)
     }
 }

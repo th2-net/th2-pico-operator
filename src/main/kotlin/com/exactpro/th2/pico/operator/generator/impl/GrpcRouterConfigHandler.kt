@@ -28,6 +28,6 @@ class GrpcRouterConfigHandler(private val resource: BoxResource) : ConfigHandler
         val config = resource.spec.mqRouter ?: return
         val defaults = loadDefaultConfig(DefaultConfigNames.grpcRouter)
         val mergedConfig = Mapper.mergeConfigs(defaults, config)
-        saveConfigFle(fileName, mergedConfig)
+        saveConfigFile(fileName, mergedConfig)
     }
 }

@@ -25,7 +25,7 @@ class GrpcConfigHandler(private val resource: BoxResource) : ConfigHandler() {
 
     override fun handle() {
         val config = grpcRouterConfigFactory.createConfig(resource)
-        saveConfigFle(fileName, config)
+        saveConfigFile(fileName, config)
     }
 
     companion object {

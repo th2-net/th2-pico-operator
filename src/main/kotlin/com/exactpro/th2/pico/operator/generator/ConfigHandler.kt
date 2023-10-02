@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,39 @@ import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 abstract class ConfigHandler {
 
     abstract fun handle()
 
-    protected fun saveConfigFle(fileName: String, configContent: Any) {
+    private fun pathToDefaultConfig(configName: DefaultConfigNames): Path =
+        Path("$defaultConfigsLocation/${defaultConfigNames[configName]}")
+
+    private fun pathToTargetConfig(fileName: String): Path {
         val file = File("$configDir/$fileName")
         file.parentFile.mkdirs()
-        val configContentStr = JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(configContent)
-        Files.writeString(file.toPath(), configContentStr)
+        return file.toPath()
     }
 
-    fun loadDefaultConfig(configName: DefaultConfigNames): Map<String, Any> {
-        val path = Path("$defaultConfigsLocation/${defaultConfigNames[configName]}")
+    protected fun copyDefaultConfig(configName: DefaultConfigNames, fileName: String) {
+        val source = pathToDefaultConfig(configName)
+        if (!Files.exists(source)) {
+            return
+        }
+        val target = pathToTargetConfig(fileName)
+        Files.copy(source, target)
+    }
+
+    protected fun saveConfigFile(fileName: String, configContent: Any) {
+        val file = pathToTargetConfig(fileName)
+        val configContentStr = JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(configContent)
+        Files.writeString(file, configContentStr)
+    }
+
+    protected fun loadDefaultConfig(configName: DefaultConfigNames): Map<String, Any> {
+        val path = pathToDefaultConfig(configName)
         return YAML_MAPPER.readValue(Files.readString(path))
     }
 

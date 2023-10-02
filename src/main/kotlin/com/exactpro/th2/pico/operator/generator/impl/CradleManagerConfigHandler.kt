@@ -28,6 +28,6 @@ class CradleManagerConfigHandler(private val resource: BoxResource) : ConfigHand
         val config = resource.spec.mqRouter ?: return
         val defaults = loadDefaultConfig(DefaultConfigNames.cradleManager)
         val mergedConfig = Mapper.mergeConfigs(defaults, config)
-        saveConfigFle(fileName, mergedConfig)
+        saveConfigFile(fileName, mergedConfig)
     }
 }

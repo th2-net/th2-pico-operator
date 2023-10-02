@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.exactpro.th2.pico.operator.generator.impl.CustomConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.DictionaryConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.GrpcConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.GrpcRouterConfigHandler
+import com.exactpro.th2.pico.operator.generator.impl.LogConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqRouterConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.PrometheusConfigHandler
@@ -38,6 +39,7 @@ class ConfigProcessor(resource: BoxResource, isOldFormat: Boolean) {
         // DictionaryConfigHandler Has to come before CustomConfigHandler as it modifies values in custom config
         add(CustomConfigHandler(resource))
         add(MqRouterConfigHandler(resource))
+        add(LogConfigHandler(resource))
         add(GrpcRouterConfigHandler(resource))
         add(CradleManagerConfigHandler(resource))
         add(PrometheusConfigHandler(resource))
