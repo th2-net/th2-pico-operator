@@ -32,7 +32,7 @@ class MqConfigHandler(private val resource: BoxResource) : ConfigHandler() {
     override fun handle() {
         val mqRouterConfigFactory = mqRouterConfigFactories[ResourceType.forKind(resource.kind)]!!
         val config = mqRouterConfigFactory.createConfig(resource)
-        saveConfigFle(fileName, config)
+        saveConfigFile(fileName, config)
     }
 
     companion object {

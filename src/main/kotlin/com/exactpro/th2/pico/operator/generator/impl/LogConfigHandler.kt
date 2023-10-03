@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package com.exactpro.th2.pico.operator.generator.impl
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
-import com.exactpro.th2.pico.operator.util.Mapper
 
-class MqRouterConfigHandler(private val resource: BoxResource) : ConfigHandler() {
-    private val fileName = "${this.resource.metadata.name}/mq_router.json"
+class LogConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+    private val log4j2FileName = "${this.resource.metadata.name}/log4j2.properties"
+    private val log4pyFileName = "${this.resource.metadata.name}/log4py.conf"
+    private val zeroLogFileName = "${this.resource.metadata.name}/zerolog.properties"
 
     override fun handle() {
-        val config = resource.spec.mqRouter ?: return
-        val defaults = loadDefaultConfig(DefaultConfigNames.mqRouter)
-        val mergedConfig = Mapper.mergeConfigs(defaults, config)
-        saveConfigFile(fileName, mergedConfig)
+        copyDefaultConfig(DefaultConfigNames.log4j2Config, log4j2FileName)
+        copyDefaultConfig(DefaultConfigNames.log4pyConfig, log4pyFileName)
+        copyDefaultConfig(DefaultConfigNames.zeroLogConfig, zeroLogFileName)
     }
 }

@@ -1,4 +1,4 @@
-### Local Run (1.3.0)
+### Local Run (1.4.0)
 1. clone pico-operator repo
 2. build code using `gradle build` command
 3. run with `"-Dconverter.config=./path/to/pico-operator-config"`
@@ -46,9 +46,20 @@ defaultSchemaConfigs:
     grpcRouter: grpc_router.json
     mqRouter: mq_router.json
     rabbitMQ: rabbitMQ.json
+    log4j2Config: log4j2.properties
+    log4pyConfig: log4py.conf
+    zeroLogConfig: zerolog.properties 
 ```
 
 # Release notes
+
+## 1.4.0
+
+## Feature:
++ added log4j2Config, log4pyConfig, zeroLogConfig config names
+
+## Fix:
++ Fix using `cradle manager` and `grpc router` configs from component custom resource.
 
 ## 1.3.0
 

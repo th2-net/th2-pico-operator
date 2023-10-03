@@ -25,9 +25,9 @@ class GrpcRouterConfigHandler(private val resource: BoxResource) : ConfigHandler
     private val fileName = "${this.resource.metadata.name}/grpc_router.json"
 
     override fun handle() {
-        val config = resource.spec.mqRouter ?: return
+        val config = resource.spec.grpcRouter ?: return
         val defaults = loadDefaultConfig(DefaultConfigNames.grpcRouter)
         val mergedConfig = Mapper.mergeConfigs(defaults, config)
-        saveConfigFle(fileName, mergedConfig)
+        saveConfigFile(fileName, mergedConfig)
     }
 }

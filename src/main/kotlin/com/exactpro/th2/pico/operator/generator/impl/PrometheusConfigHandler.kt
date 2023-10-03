@@ -24,7 +24,7 @@ class PrometheusConfigHandler(private val resource: BoxResource) : ConfigHandler
     private val fileName = "${this.resource.metadata.name}/prometheus.json"
 
     override fun handle() {
-        saveConfigFle(
+        saveConfigFile(
             fileName,
             PrometheusConfig(
                 ConfigLoader.config.prometheus.enabled,

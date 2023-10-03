@@ -25,9 +25,9 @@ class CradleManagerConfigHandler(private val resource: BoxResource) : ConfigHand
     private val fileName = "${this.resource.metadata.name}/cradle_manager.json"
 
     override fun handle() {
-        val config = resource.spec.mqRouter ?: return
+        val config = resource.spec.cradleManager ?: return
         val defaults = loadDefaultConfig(DefaultConfigNames.cradleManager)
         val mergedConfig = Mapper.mergeConfigs(defaults, config)
-        saveConfigFle(fileName, mergedConfig)
+        saveConfigFile(fileName, mergedConfig)
     }
 }
