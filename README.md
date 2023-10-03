@@ -58,6 +58,9 @@ defaultSchemaConfigs:
 ## Feature:
 + added log4j2Config, log4pyConfig, zeroLogConfig config names
 
+## Fix:
++ Fix using `cradle manager` and `grpc router` configs from component custom resource.
+
 ## 1.3.0
 
 ### Updated:
