@@ -18,6 +18,7 @@ package com.exactpro.th2.pico.operator.repo
 
 enum class ResourceType(val kind: String, val path: String) {
     Th2Dictionary("Th2Dictionary", "dictionaries"),
+    InfraMgrConfig("SettingsFile", ""),
     Th2CoreBox("Th2CoreBox", "core"),
     Th2Mstore("Th2Mstore", "core"),
     Th2Estore("Th2Estore", "core"),

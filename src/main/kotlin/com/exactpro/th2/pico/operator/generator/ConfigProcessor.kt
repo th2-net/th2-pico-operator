@@ -28,12 +28,13 @@ import com.exactpro.th2.pico.operator.generator.impl.MqConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqRouterConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.PrometheusConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import com.exactpro.th2.pico.operator.repo.InfraMgrConfigResource
 
-class ConfigProcessor(resource: BoxResource, isOldFormat: Boolean) {
+class ConfigProcessor(infraMgrConfig: InfraMgrConfigResource, resource: BoxResource, isOldFormat: Boolean) {
     private val configHandlers: List<ConfigHandler> = ArrayList<ConfigHandler>().apply {
         add(MqConfigHandler(resource))
-        add(BoxConfigHandler(resource))
-        add(BoxAdditionalConfigHandler(resource))
+        add(BoxConfigHandler(infraMgrConfig, resource))
+        add(BoxAdditionalConfigHandler(infraMgrConfig, resource))
         add(GrpcConfigHandler(resource))
         add(DictionaryConfigHandler(resource, isOldFormat))
         // DictionaryConfigHandler Has to come before CustomConfigHandler as it modifies values in custom config
