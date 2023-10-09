@@ -56,7 +56,7 @@ object RepositoryLoader {
             1 -> map.values.single()
             else -> error(
                 "Infra schema should contain only one 'InfraMgrConfig' " +
-                        "with '${ResourceType.InfraMgrConfig.kind}' kind, found: $map"
+                    "with '${ResourceType.InfraMgrConfig.kind}' kind, found: $map"
             )
         }
     }
