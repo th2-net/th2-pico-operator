@@ -37,6 +37,18 @@ object RepositoryLoader {
         return YAML_MAPPER.readValue(Files.readString(file.toPath()))
     }
 
+    fun loadBoxResources(): Map<String, BoxResource> {
+        val firstOccurrences: MutableSet<String> = HashSet()
+        val resources: MutableMap<String, BoxResource> = HashMap()
+        for (t in ResourceType.values()) {
+            if (!t.isComponent) {
+                continue
+            }
+            resources.putAll(loadKind(t, firstOccurrences))
+        }
+        return resources
+    }
+
     fun loadInfraMgrConfigResource(): InfraMgrConfigResource {
         val map: Map<String, InfraMgrConfigResource> = loadKind(ResourceType.InfraMgrConfig, mutableSetOf())
         return when (map.size) {
@@ -44,21 +56,9 @@ object RepositoryLoader {
             1 -> map.values.single()
             else -> error(
                 "Infra schema should contain only one 'InfraMgrConfig' " +
-                    "with '${ResourceType.InfraMgrConfig.kind}' kind, found: $map"
+                        "with '${ResourceType.InfraMgrConfig.kind}' kind, found: $map"
             )
         }
-    }
-
-    fun loadBoxResources(): Map<String, BoxResource> {
-        val firstOccurrences: MutableSet<String> = HashSet()
-        val resources: MutableMap<String, BoxResource> = HashMap()
-        for (t in ResourceType.values()) {
-            if (t == ResourceType.Th2Dictionary) {
-                continue
-            }
-            resources.putAll(loadKind(t, firstOccurrences))
-        }
-        return resources
     }
 
     fun loadDictionaries(): Map<String, DictionaryResource> {
