@@ -23,5 +23,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class BoxResource(
     override val kind: String = "",
     override val metadata: Metadata = Metadata(),
+    @JsonIgnoreProperties(ignoreUnknown = true)
     val spec: Spec,
 ) : CustomResource
