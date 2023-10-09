@@ -18,11 +18,21 @@ package com.exactpro.th2.pico.operator.generator.impl
 
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import com.exactpro.th2.pico.operator.repo.InfraMgrConfigResource
 
-class BoxConfigHandler(private val resource: BoxResource) : ConfigHandler() {
-    private val fileName = "${this.resource.metadata.name}/box.json"
+class BoxConfigHandler(
+    private val infraMgrConfig: InfraMgrConfigResource,
+    private val resource: BoxResource
+) : ConfigHandler() {
+    private val fileName = "${resource.metadata.name}/box.json"
 
     override fun handle() {
-        saveConfigFile(fileName, mapOf("boxName" to resource.metadata.name))
+        saveConfigFile(
+            fileName,
+            mapOf(
+                "boxName" to resource.metadata.name,
+                "bookName" to (resource.spec.bookName ?: infraMgrConfig.spec.bookConfig.defaultBook)
+            )
+        )
     }
 }

@@ -41,12 +41,24 @@ object RepositoryLoader {
         val firstOccurrences: MutableSet<String> = HashSet()
         val resources: MutableMap<String, BoxResource> = HashMap()
         for (t in ResourceType.values()) {
-            if (t == ResourceType.Th2Dictionary) {
+            if (!t.isComponent) {
                 continue
             }
             resources.putAll(loadKind(t, firstOccurrences))
         }
         return resources
+    }
+
+    fun loadInfraMgrConfigResource(): InfraMgrConfigResource {
+        val map: Map<String, InfraMgrConfigResource> = loadKind(ResourceType.InfraMgrConfig, mutableSetOf())
+        return when (map.size) {
+            0 -> InfraMgrConfigResource()
+            1 -> map.values.single()
+            else -> error(
+                "Infra schema should contain only one 'InfraMgrConfig' " +
+                    "with '${ResourceType.InfraMgrConfig.kind}' kind, found: $map"
+            )
+        }
     }
 
     fun loadDictionaries(): Map<String, DictionaryResource> {

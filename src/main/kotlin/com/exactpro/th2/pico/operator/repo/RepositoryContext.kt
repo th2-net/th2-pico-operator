@@ -17,6 +17,7 @@
 package com.exactpro.th2.pico.operator.repo
 
 object RepositoryContext {
+    val infraMgrConfig: InfraMgrConfigResource = RepositoryLoader.loadInfraMgrConfigResource()
     val boxResources: Map<String, BoxResource> = RepositoryLoader.loadBoxResources()
     val dictionaries: Map<String, DictionaryResource> = RepositoryLoader.loadDictionaries()
 }

@@ -1,4 +1,4 @@
-### Local Run (1.4.0)
+### Local Run (1.5.0)
 1. clone pico-operator repo
 2. build code using `gradle build` command
 3. run with `"-Dconverter.config=./path/to/pico-operator-config"`
@@ -42,7 +42,6 @@ defaultSchemaConfigs:
   configNames: map of <configName, configFileName.extension> for default configs that are needed for each schema
     cradle: cradle.json
     cradleManager: cradle_manager.json
-    bookConfig: book_config.json
     grpcRouter: grpc_router.json
     mqRouter: mq_router.json
     rabbitMQ: rabbitMQ.json
@@ -52,6 +51,14 @@ defaultSchemaConfigs:
 ```
 
 # Release notes
+
+## 1.5.0
+
+## Feature:
++ Use book name from infra manager config or from component custom resource  
+
+## Deprecated
++ defaultSchemaConfigs.configNames.bookConfig is deprecated. Default book name is taken from infra manager config
 
 ## 1.4.0
 

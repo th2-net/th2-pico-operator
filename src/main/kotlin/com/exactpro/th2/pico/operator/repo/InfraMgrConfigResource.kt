@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.exactpro.th2.pico.operator.repo
 
-import com.exactpro.th2.model.latest.box.Spec
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class BoxResource(
+data class InfraMgrConfigResource(
     override val kind: String = "",
     override val metadata: Metadata = Metadata(),
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    val spec: Spec,
+    val spec: InfraMgrConfigSpec = InfraMgrConfigSpec()
 ) : CustomResource
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class InfraMgrConfigSpec(
+    val bookConfig: BookConfig = BookConfig()
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class BookConfig(
+    val defaultBook: String = "test_book"
+)

@@ -16,13 +16,15 @@
 
 package com.exactpro.th2.pico.operator.repo
 
-enum class ResourceType(val kind: String, val path: String) {
-    Th2Dictionary("Th2Dictionary", "dictionaries"),
-    Th2CoreBox("Th2CoreBox", "core"),
-    Th2Mstore("Th2Mstore", "core"),
-    Th2Estore("Th2Estore", "core"),
-    Th2Box("Th2Box", "boxes"),
-    Th2Job("Th2Job", "jobs");
+enum class ResourceType(val kind: String, val path: String, val isComponent: Boolean) {
+    Th2Dictionary("Th2Dictionary", "dictionaries", false),
+    InfraMgrConfig("SettingsFile", "", false),
+
+    Th2CoreBox("Th2CoreBox", "core", true),
+    Th2Mstore("Th2Mstore", "core", true),
+    Th2Estore("Th2Estore", "core", true),
+    Th2Box("Th2Box", "boxes", true),
+    Th2Job("Th2Job", "jobs", true);
 
     companion object {
         private val kinds: MutableMap<String, ResourceType> = HashMap()
