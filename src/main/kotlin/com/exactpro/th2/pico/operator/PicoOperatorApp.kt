@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ const val MESSAGE_STORAGE_PARSED_PIN_ALIAS = "mstore-pin-parsed"
 
 val schemaName = ConfigLoader.config.schemaName
 val configDir = ConfigLoader.config.generatedConfigsLocation
+val environmentVariables = ConfigLoader.config.defaultEnvironmentVariables
 
 fun main(args: Array<String>) {
     val mode = if (args.isNotEmpty()) args[0] else "full"
