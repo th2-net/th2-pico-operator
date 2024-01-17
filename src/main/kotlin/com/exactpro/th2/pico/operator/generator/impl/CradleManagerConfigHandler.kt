@@ -21,10 +21,11 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
+import java.nio.file.Path
 
 class CradleManagerConfigHandler(
     private val resource: BoxResource,
-    generatedConfigsLocation: String,
+    generatedConfigsLocation: Path,
     schemaConfigs: DefaultSchemaConfigs,
 ) : ConfigHandler(
     generatedConfigsLocation,

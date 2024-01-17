@@ -23,20 +23,17 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.apache.commons.text.StringSubstitutor
 import org.apache.commons.text.lookup.StringLookupFactory
-import java.nio.file.Path
-import kotlin.io.path.inputStream
+import java.io.InputStream
 
 object ConfigLoader {
 
     private val logger = KotlinLogging.logger { }
 
-    fun loadConfiguration(configPath: Path): ApplicationConfig {
+    fun loadConfiguration(config: InputStream): ApplicationConfig {
         try {
-            configPath.inputStream().use { inputStream ->
-                val stringSubstitute = StringSubstitutor(StringLookupFactory.INSTANCE.environmentVariableStringLookup())
-                val content = stringSubstitute.replace(String(inputStream.readAllBytes()))
-                return YAML_MAPPER.readValue(content)
-            }
+            val stringSubstitute = StringSubstitutor(StringLookupFactory.INSTANCE.environmentVariableStringLookup())
+            val content = stringSubstitute.replace(String(config.readAllBytes()))
+            return YAML_MAPPER.readValue(content)
         } catch (e: UnrecognizedPropertyException) {
             logger.error(
                 "Bad configuration: unknown property(\"{}\") specified in configuration file",

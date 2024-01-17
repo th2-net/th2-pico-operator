@@ -28,16 +28,17 @@ import org.apache.commons.text.StringSubstitutor
 import org.apache.commons.text.lookup.StringLookup
 import org.apache.commons.text.lookup.StringLookupFactory
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.nio.file.Files
-import java.util.*
+import java.nio.file.Path
+import java.util.Base64
 import java.util.zip.GZIPOutputStream
+import kotlin.io.path.createDirectories
+import kotlin.io.path.writeText
 
 class DictionaryConfigHandler(
     private val resource: BoxResource,
     private val isOldFormat: Boolean,
     private val dictionaryResources: Map<String, DictionaryResource>,
-    generatedConfigsLocation: String,
+    generatedConfigsLocation: Path,
     schemaConfigs: DefaultSchemaConfigs,
 ) : ConfigHandler(
     generatedConfigsLocation,
@@ -70,9 +71,10 @@ class DictionaryConfigHandler(
     }
 
     private fun saveDictionary(fileName: String, data: String) {
-        val file = File("$generatedConfigsLocation/$dictionariesDir/$fileName")
-        file.parentFile.mkdirs()
-        Files.writeString(file.toPath(), data)
+        generatedConfigsLocation.resolve(dictionariesDir).resolve(fileName).apply {
+            parent.createDirectories()
+            writeText(data)
+        }
     }
 
     private fun collectDictionaries(spec: Spec) {

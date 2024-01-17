@@ -37,10 +37,6 @@ prometheus:
    enabled: false # true or false - default true
    start: 9000 # starting port number
    end: 9090 # ending port number
-defaultEnvironmentVariables: # map of <environment variable name, list of values> to apply for all run components
-   JAVA_TOOL_OPTIONS:
-      - "-XX:+ExitOnOutOfMemoryError"
-      - "-Dlog4j2.shutdownHookEnabled=false"
 defaultSchemaConfigs:
   location: cfg/defaultConfigs # location for default configs that should be copied for each schema
   configNames: # map of <configName, configFileName.extension> for default configs that are needed for each schema
@@ -56,8 +52,9 @@ defaultSchemaConfigs:
 
 # Release notes
 
-## 1.6.0
-+ Added `defaultEnvironmentVariables` into pico config file.
+## 1.5.1
+### Refactored:
++ Removed configuration singleton 
 
 ## 1.5.0
 

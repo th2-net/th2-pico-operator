@@ -19,21 +19,27 @@ package com.exactpro.th2.pico.operator.repo
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
-import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.collections.HashMap
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.extension
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.nameWithoutExtension
 
 class RepositoryLoader(
-    repoLocation: String,
+    repoLocation: Path,
     schemaName: String,
 ) {
 
     private val logger = KotlinLogging.logger { }
 
-    private val schemaDir = "$repoLocation/$schemaName"
+    private val schemaDir = repoLocation.resolve(schemaName)
 
-    private inline fun <reified T> loadCustomResourceFile(file: File): T {
-        return YAML_MAPPER.readValue(Files.readString(file.toPath()))
+    private inline fun <reified T> loadCustomResourceFile(path: Path): T {
+        return YAML_MAPPER.readValue(Files.readString(path))
     }
 
     fun loadBoxResources(): Map<String, BoxResource> {
@@ -70,45 +76,38 @@ class RepositoryLoader(
         firstOccurrences: MutableSet<String>
     ): Map<String, T> {
         val resources: MutableMap<String, T> = HashMap()
-        val dir = File(schemaDir + "/" + kind.path)
-        if (dir.exists()) {
-            val files = dir.listFiles() ?: return resources
-            for (f in files) {
-                if (f.isFile && (f.absolutePath.endsWith(YML_EXTENSION) || f.absolutePath.endsWith(YAML_EXTENSION))) {
+        val dir = schemaDir.resolve(kind.path)
+        if (dir.isDirectory()) {
+            dir.listDirectoryEntries().forEach { f ->
+                if (f.isRegularFile() && (SUPPORTED_EXTENSIONS.contains(f.extension))) {
                     try {
                         val resource = loadCustomResourceFile<T>(f)
                         val meta = resource.metadata
                         if (f.nameWithoutExtension != meta.name) {
-                            logger.warn(
-                                "skipping \"{}\" | resource name does not match filename",
-                                f.absolutePath
-                            )
-                            continue
+                            logger.warn {
+                                "skipping '${f.absolutePathString()}' | resource name does not match filename."
+                            }
+                            return@forEach
                         }
                         if (!ResourceType.knownKinds().contains(resource.kind)) {
-                            logger.error(
-                                "skipping \"{}\" | Unknown kind \"{}\". Known values are: \"{}\"",
-                                f.absolutePath,
-                                resource.kind,
-                                ResourceType.knownKinds()
-                            )
-                            continue
+                            logger.error {
+                                "skipping '${f.absolutePathString()}' | Unknown kind '${resource.kind}'. " +
+                                    "Known values are: '${ResourceType.knownKinds()}'"
+                            }
+                            return@forEach
                         }
                         if (!ResourceType.forKind(resource.kind)?.path.equals(kind.path)) {
-                            logger.error(
-                                "skipping \"{}\" | resource is located in wrong directory. kind" +
-                                    ": {}, dir:" + " {}",
-                                f.absolutePath,
-                                resource.kind,
-                                kind.path
-                            )
-                            continue
+                            logger.error {
+                                "skipping '${f.absolutePathString()}' | resource is located in wrong directory. " +
+                                    "kind: '${resource.kind}', dir: '${kind.path}'"
+                            }
+                            return@forEach
                         }
 
                         // some directories might contain multiple resource kinds
                         // skip other kinds as they will be checked on their iteration
                         if (resource.kind != kind.kind) {
-                            continue
+                            return@forEach
                         }
 
                         val name: String = meta.name
@@ -120,12 +119,14 @@ class RepositoryLoader(
                                 name,
                             )
                             resources.remove(name)
-                            continue
+                            return@forEach
                         }
                         resources[name] = resource
                         firstOccurrences.add(name)
                     } catch (e: Exception) {
-                        logger.error("skipping \"{}\" | exception loading resource", f.absolutePath, e)
+                        logger.error(e) {
+                            "skipping '${f.absolutePathString()}' | exception loading resource"
+                        }
                     }
                 }
             }
@@ -134,7 +135,6 @@ class RepositoryLoader(
     }
 
     companion object {
-        private const val YML_EXTENSION = ".yml"
-        private const val YAML_EXTENSION = ".yaml"
+        private val SUPPORTED_EXTENSIONS = setOf("yml", "yaml", "json")
     }
 }

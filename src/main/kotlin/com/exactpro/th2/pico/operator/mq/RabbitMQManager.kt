@@ -30,8 +30,7 @@ import com.rabbitmq.http.client.domain.QueueInfo
 import com.rabbitmq.http.client.domain.UserPermissions
 import mu.KotlinLogging
 import java.io.IOException
-import java.nio.file.Files
-import kotlin.io.path.Path
+import kotlin.io.path.inputStream
 
 class RabbitMQManager(
     private val managementConfig: RabbitMQManagementConfig,
@@ -178,16 +177,18 @@ class RabbitMQManager(
     }
 
     private fun getUserPassword(): String {
-        defaultSchemaConfigs
-        val rabbitMqAppConfig = Files.readString(
-            Path("${defaultSchemaConfigs.location}/${defaultSchemaConfigs.configNames[DefaultConfigNames.rabbitMQ]}")
-        )
-        val cmData: Map<String, String> = JSON_MAPPER.readValue(rabbitMqAppConfig)
-        return cmData["password"]!!
+        return requireNotNull(defaultSchemaConfigs.configNames[DefaultConfigNames.rabbitMQ]) {
+            "th2 config name for '${DefaultConfigNames.rabbitMQ}; isn't declared in config"
+        }.run(defaultSchemaConfigs.location::resolve).inputStream().use {
+            requireNotNull(JSON_MAPPER.readValue<Map<String, String>>(it)[PASSWORD_FIELD]) {
+                "'$PASSWORD_FIELD' field isn't declared in the ${DefaultConfigNames.rabbitMQ} config"
+            }
+        }
     }
 
     companion object {
         private const val DEFAULT_QUEUE_LENGTH = 1000
         private const val DEFAULT_STRATEGY = "drop-head"
+        private const val PASSWORD_FIELD = "password"
     }
 }

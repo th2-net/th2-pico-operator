@@ -19,10 +19,11 @@ package com.exactpro.th2.pico.operator.generator.impl
 import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import java.nio.file.Path
 
 class CustomConfigHandler(
     private val resource: BoxResource,
-    generatedConfigsLocation: String,
+    generatedConfigsLocation: Path,
     schemaConfigs: DefaultSchemaConfigs,
 ) : ConfigHandler(
     generatedConfigsLocation,

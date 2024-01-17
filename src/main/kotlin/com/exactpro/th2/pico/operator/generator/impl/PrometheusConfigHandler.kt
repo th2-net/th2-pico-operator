@@ -20,11 +20,12 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.config.fields.PrometheusPortsConfig
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import java.nio.file.Path
 
 class PrometheusConfigHandler(
     private val resource: BoxResource,
     private val prometheusPortsConfig: PrometheusPortsConfig,
-    generatedConfigsLocation: String,
+    generatedConfigsLocation: Path,
     schemaConfigs: DefaultSchemaConfigs,
 ) : ConfigHandler(
     generatedConfigsLocation,

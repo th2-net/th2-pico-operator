@@ -19,6 +19,7 @@ package com.exactpro.th2.pico.operator
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.OperatorRunConfig
 import java.nio.file.Paths
+import kotlin.io.path.inputStream
 import kotlin.system.exitProcess
 
 const val EVENT_STORAGE_BOX_ALIAS = "estore"
@@ -40,6 +41,7 @@ fun main(args: Array<String>) {
         CONFIG_FILE_NAME
     )
 
-    PicoOperator(ConfigLoader.loadConfiguration(Paths.get(path))).run(OperatorRunConfig(mode, old))
+    val appConfig = Paths.get(path).inputStream().use(ConfigLoader::loadConfiguration)
+    PicoOperator(appConfig).run(OperatorRunConfig(mode, old))
     exitProcess(0)
 }

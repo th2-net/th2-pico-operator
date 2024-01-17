@@ -20,11 +20,12 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.grpc.factory.GrpcRouterConfigFactory
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import java.nio.file.Path
 
 class GrpcConfigHandler(
     private val resource: BoxResource,
     private val grpcRouterConfigFactory: GrpcRouterConfigFactory,
-    generatedConfigsLocation: String,
+    generatedConfigsLocation: Path,
     schemaConfigs: DefaultSchemaConfigs,
 ) : ConfigHandler(
     generatedConfigsLocation,

@@ -20,9 +20,10 @@ import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 
 class ImageExtractor(
-    private val generatedConfigsLocation: String,
+    private val generatedConfigsLocation: Path,
 ) {
     private val images: MutableSet<String> = HashSet()
 

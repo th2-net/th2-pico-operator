@@ -24,12 +24,13 @@ import com.exactpro.th2.pico.operator.mq.factory.MqRouterConfigFactoryEstore
 import com.exactpro.th2.pico.operator.mq.factory.MqRouterConfigFactoryMstore
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.ResourceType
+import java.nio.file.Path
 
 class MqConfigHandler(
     private val resource: BoxResource,
     globalExchange: String,
     schemaName: String,
-    generatedConfigsLocation: String,
+    generatedConfigsLocation: Path,
     schemaConfigs: DefaultSchemaConfigs,
 ) : ConfigHandler(
     generatedConfigsLocation,

@@ -16,7 +16,9 @@
 
 package com.exactpro.th2.pico.operator.config.fields
 
+import java.nio.file.Path
+
 data class DefaultSchemaConfigs(
-    val location: String, // FIXME: change to Path
+    val location: Path,
     val configNames: Map<DefaultConfigNames, String>,
 )

@@ -21,69 +21,81 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.File
-import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.Path
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.exists
+import kotlin.io.path.inputStream
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.outputStream
 
 abstract class ConfigHandler(
-    protected val generatedConfigsLocation: String,
+    protected val generatedConfigsLocation: Path,
     private val schemaConfigs: DefaultSchemaConfigs,
 ) {
     abstract fun handle()
 
-    private fun pathToDefaultConfig(configName: DefaultConfigNames): Path =
-        Path("${schemaConfigs.location}/${schemaConfigs.configNames[configName]}")
+    private fun pathToDefaultConfig(configName: DefaultConfigNames): Path {
+        return requireNotNull(schemaConfigs.configNames[configName]) {
+            "th2 config name for '$configName; isn't declared in config"
+        }.run(schemaConfigs.location::resolve)
+    }
 
     private fun pathToTargetConfig(fileName: String): Path {
-        val file = File("$generatedConfigsLocation/$fileName")
-        file.parentFile.mkdirs()
-        return file.toPath()
+        return generatedConfigsLocation.resolve(fileName).also {
+            it.parent.createDirectories()
+        }
     }
 
     protected fun copyDefaultConfig(configName: DefaultConfigNames, fileName: String) {
         val source = pathToDefaultConfig(configName)
-        if (!Files.exists(source)) {
+        if (!source.exists()) {
             return
         }
         val target = pathToTargetConfig(fileName)
-        Files.copy(source, target)
+        source.copyTo(target)
     }
 
     protected fun saveConfigFile(fileName: String, configContent: Any) {
-        val file = pathToTargetConfig(fileName)
-        val configContentStr = JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(configContent)
-        Files.writeString(file, configContentStr)
+        pathToTargetConfig(fileName).outputStream().use {
+            JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValue(it, configContent)
+        }
     }
 
     protected fun loadDefaultConfig(configName: DefaultConfigNames): Map<String, Any> {
-        val path = pathToDefaultConfig(configName)
-        return YAML_MAPPER.readValue(Files.readString(path))
+        return pathToDefaultConfig(configName).inputStream().use {
+            YAML_MAPPER.readValue(it)
+        }
     }
 
     companion object {
-        fun clearOldConfigs(generatedConfigsLocation: String) {
-            File(generatedConfigsLocation).deleteRecursively()
+        private const val LOGGING_DIR_NAME = "logging"
+
+        @OptIn(ExperimentalPathApi::class)
+        fun clearOldConfigs(generatedConfigsLocation: Path) {
+            generatedConfigsLocation.deleteRecursively()
         }
 
-        fun copyDefaultConfigs(schemaConfigs: DefaultSchemaConfigs, generatedConfigsLocation: String) {
-            val directories = File(generatedConfigsLocation).listFiles() ?: return
-            directories.forEach { dir ->
-                if (dir.isDirectory) {
+        fun copyDefaultConfigs(schemaConfigs: DefaultSchemaConfigs, generatedConfigsLocation: Path) {
+            generatedConfigsLocation.listDirectoryEntries().asSequence()
+                .filter(Path::isDirectory)
+                .forEach { dir ->
                     schemaConfigs.configNames.values.forEach { file ->
-                        if (!File("$dir/$file").exists()) {
-                            Files.copy(Path("${schemaConfigs.location}/$file"), Path("$dir/$file"))
-                        }
+                        val source = schemaConfigs.location.resolve(file)
+                        val target = dir.resolve(file)
+                        source.copyTo(target, false)
                     }
                 }
-            }
             copyLogging(schemaConfigs.location, generatedConfigsLocation)
         }
 
-        private fun copyLogging(schemaConfigsLocation: String, generatedConfigsLocation: String) {
-            val files = File("$schemaConfigsLocation/logging").listFiles() ?: return
-            files.forEach {
-                Files.copy(it.toPath(), Path("$generatedConfigsLocation/${it.name}"))
+        private fun copyLogging(schemaConfigsLocation: Path, generatedConfigsLocation: Path) {
+            schemaConfigsLocation.resolve(LOGGING_DIR_NAME).listDirectoryEntries().forEach {
+                it.copyTo(generatedConfigsLocation.resolve(it.name), true)
             }
         }
     }

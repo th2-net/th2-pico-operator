@@ -20,14 +20,14 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.config.fields.GrpcConfig
 import com.exactpro.th2.pico.operator.config.fields.PrometheusPortsConfig
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
+import java.nio.file.Path
 
 data class ApplicationConfig(
-    val repoLocation: String,
-    val generatedConfigsLocation: String,
+    val repoLocation: Path,
+    val generatedConfigsLocation: Path,
     val schemaName: String,
     val rabbitMQManagement: RabbitMQManagementConfig,
     val grpc: GrpcConfig,
     val prometheus: PrometheusPortsConfig,
     val defaultSchemaConfigs: DefaultSchemaConfigs,
-    val defaultEnvironmentVariables: Map<String, Set<String>>
 )
