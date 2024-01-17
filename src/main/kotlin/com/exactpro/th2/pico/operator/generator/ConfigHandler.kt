@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package com.exactpro.th2.pico.operator.generator
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
-import com.exactpro.th2.pico.operator.configDir
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -27,15 +26,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-abstract class ConfigHandler {
-
+abstract class ConfigHandler(
+    protected val generatedConfigsLocation: String,
+    private val schemaConfigs: DefaultSchemaConfigs,
+) {
     abstract fun handle()
 
     private fun pathToDefaultConfig(configName: DefaultConfigNames): Path =
-        Path("$defaultConfigsLocation/${defaultConfigNames[configName]}")
+        Path("${schemaConfigs.location}/${schemaConfigs.configNames[configName]}")
 
     private fun pathToTargetConfig(fileName: String): Path {
-        val file = File("$configDir/$fileName")
+        val file = File("$generatedConfigsLocation/$fileName")
         file.parentFile.mkdirs()
         return file.toPath()
     }
@@ -61,31 +62,28 @@ abstract class ConfigHandler {
     }
 
     companion object {
-        private val defaultConfigsLocation = ConfigLoader.config.defaultSchemaConfigs.location
-        private val defaultConfigNames = ConfigLoader.config.defaultSchemaConfigs.configNames
-
-        fun clearOldConfigs() {
-            File(configDir).deleteRecursively()
+        fun clearOldConfigs(generatedConfigsLocation: String) {
+            File(generatedConfigsLocation).deleteRecursively()
         }
 
-        fun copyDefaultConfigs() {
-            val directories = File(configDir).listFiles() ?: return
+        fun copyDefaultConfigs(schemaConfigs: DefaultSchemaConfigs, generatedConfigsLocation: String) {
+            val directories = File(generatedConfigsLocation).listFiles() ?: return
             directories.forEach { dir ->
                 if (dir.isDirectory) {
-                    ConfigLoader.config.defaultSchemaConfigs.configNames.values.forEach { file ->
+                    schemaConfigs.configNames.values.forEach { file ->
                         if (!File("$dir/$file").exists()) {
-                            Files.copy(Path("$defaultConfigsLocation/$file"), Path("$dir/$file"))
+                            Files.copy(Path("${schemaConfigs.location}/$file"), Path("$dir/$file"))
                         }
                     }
                 }
             }
-            copyLogging()
+            copyLogging(schemaConfigs.location, generatedConfigsLocation)
         }
 
-        private fun copyLogging() {
-            val files = File("${ConfigLoader.config.defaultSchemaConfigs.location}/logging").listFiles() ?: return
+        private fun copyLogging(schemaConfigsLocation: String, generatedConfigsLocation: String) {
+            val files = File("$schemaConfigsLocation/logging").listFiles() ?: return
             files.forEach {
-                Files.copy(it.toPath(), Path("$configDir/${it.name}"))
+                Files.copy(it.toPath(), Path("$generatedConfigsLocation/${it.name}"))
             }
         }
     }

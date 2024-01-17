@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,24 @@
 
 package com.exactpro.th2.pico.operator.generator.impl
 
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.grpc.factory.GrpcRouterConfigFactory
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class GrpcConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+class GrpcConfigHandler(
+    private val resource: BoxResource,
+    private val grpcRouterConfigFactory: GrpcRouterConfigFactory,
+    generatedConfigsLocation: String,
+    schemaConfigs: DefaultSchemaConfigs,
+) : ConfigHandler(
+    generatedConfigsLocation,
+    schemaConfigs,
+) {
     private val fileName = "${this.resource.metadata.name}/grpc.json"
 
     override fun handle() {
         val config = grpcRouterConfigFactory.createConfig(resource)
         saveConfigFile(fileName, config)
-    }
-
-    companion object {
-        private val grpcRouterConfigFactory = GrpcRouterConfigFactory()
     }
 }

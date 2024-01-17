@@ -18,6 +18,7 @@ package com.exactpro.th2.pico.operator
 
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.OperatorRunConfig
+import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 const val EVENT_STORAGE_BOX_ALIAS = "estore"
@@ -27,13 +28,18 @@ const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
 const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin-raw"
 const val MESSAGE_STORAGE_PARSED_PIN_ALIAS = "mstore-pin-parsed"
 
-val schemaName = ConfigLoader.config.schemaName
-val configDir = ConfigLoader.config.generatedConfigsLocation
-val defaultEnvironmentVariables = ConfigLoader.config.defaultEnvironmentVariables
+private const val CONFIG_FILE_SYSTEM_PROPERTY = "pico.operator.config"
+private const val CONFIG_FILE_NAME = "./config.yml"
 
 fun main(args: Array<String>) {
     val mode = if (args.isNotEmpty()) args[0] else "full"
     val old = args.size > 1 && args[1] == "old"
-    PicoOperator.run(OperatorRunConfig(mode, old))
+
+    val path: String = System.getProperty(
+        CONFIG_FILE_SYSTEM_PROPERTY,
+        CONFIG_FILE_NAME
+    )
+
+    PicoOperator(ConfigLoader.loadConfiguration(Paths.get(path))).run(OperatorRunConfig(mode, old))
     exitProcess(0)
 }

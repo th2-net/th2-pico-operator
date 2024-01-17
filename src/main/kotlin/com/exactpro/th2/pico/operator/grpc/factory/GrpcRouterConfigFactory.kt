@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@
 package com.exactpro.th2.pico.operator.grpc.factory
 
 import com.exactpro.th2.model.latest.box.pins.GrpcClient
-import com.exactpro.th2.pico.operator.config.ConfigLoader
+import com.exactpro.th2.pico.operator.config.fields.GrpcServerPortsConfig
 import com.exactpro.th2.pico.operator.grpc.GrpcEndpointConfiguration
 import com.exactpro.th2.pico.operator.grpc.GrpcRouterConfiguration
 import com.exactpro.th2.pico.operator.grpc.GrpcServerConfiguration
 import com.exactpro.th2.pico.operator.grpc.GrpcServiceConfiguration
 import com.exactpro.th2.pico.operator.grpc.RoutingStrategy
 import com.exactpro.th2.pico.operator.repo.BoxResource
-import java.util.*
-import kotlin.collections.HashMap
 
-class GrpcRouterConfigFactory {
+class GrpcRouterConfigFactory(
+    private val grpcServerPortsConfig: GrpcServerPortsConfig,
+) {
     fun createConfig(resource: BoxResource): GrpcRouterConfiguration {
         var server: GrpcServerConfiguration? = null
         val services: MutableMap<String, GrpcServiceConfiguration> = HashMap()
@@ -74,7 +74,7 @@ class GrpcRouterConfigFactory {
     }
 
     private fun getServerPort(serverName: String): Int {
-        val serverPort = serverPortMapping[serverName] ?: ConfigLoader.config.grpc.serverPorts.getPort()
+        val serverPort = serverPortMapping[serverName] ?: grpcServerPortsConfig.acquirePort()
         serverPortMapping[serverName] = serverPort
         return serverPort
     }

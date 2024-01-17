@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 package com.exactpro.th2.pico.operator.mq
 
 import com.exactpro.th2.model.latest.box.pins.PinSettings
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
 import com.exactpro.th2.pico.operator.mq.queue.Queue
-import com.exactpro.th2.pico.operator.schemaName
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.rabbitmq.http.client.Client
@@ -34,13 +33,12 @@ import java.io.IOException
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-object RabbitMQManager {
+class RabbitMQManager(
+    private val managementConfig: RabbitMQManagementConfig,
+    private val defaultSchemaConfigs: DefaultSchemaConfigs,
+    val schemaName: String,
+) {
     private val logger = KotlinLogging.logger { }
-
-    private const val defaultQueueLength = 1000
-    private const val defaultStrategy = "drop-head"
-
-    private val managementConfig: RabbitMQManagementConfig = ConfigLoader.config.rabbitMQManagement
 
     private val client: Client = Client(
         ClientParameters()
@@ -50,6 +48,7 @@ object RabbitMQManager {
     )
 
     val channel = RabbitMqChannelFactory.create(managementConfig)
+    val persistence = managementConfig.persistence
 
     fun creteInitialSetup() {
         declareTopicExchange()
@@ -76,8 +75,8 @@ object RabbitMQManager {
             emptyMap()
         } else {
             val args: MutableMap<String, Any?> = HashMap()
-            args["x-max-length"] = pinSettings.queueLength ?: defaultQueueLength
-            args["x-overflow"] = pinSettings.overloadStrategy ?: defaultStrategy
+            args["x-max-length"] = pinSettings.queueLength ?: DEFAULT_QUEUE_LENGTH
+            args["x-overflow"] = pinSettings.overloadStrategy ?: DEFAULT_STRATEGY
             args
         }
     }
@@ -89,7 +88,7 @@ object RabbitMQManager {
     private fun declareTopicExchange() {
         val exchangeName = managementConfig.exchangeName
         try {
-            channel.exchangeDeclare(exchangeName, "topic", managementConfig.persistence)
+            channel.exchangeDeclare(exchangeName, "topic", persistence)
         } catch (e: Exception) {
             logger.error("Exception setting up exchange: \"{}\"", exchangeName, e)
         }
@@ -133,9 +132,8 @@ object RabbitMQManager {
     }
 
     private fun declareExchange() {
-        val rabbitMQManagementConfig = managementConfig
         try {
-            channel.exchangeDeclare(schemaName, "direct", rabbitMQManagementConfig.persistence)
+            channel.exchangeDeclare(schemaName, "direct", persistence)
         } catch (e: Exception) {
             logger.error("Exception setting up exchange: \"{}\"", schemaName, e)
             throw e
@@ -180,11 +178,16 @@ object RabbitMQManager {
     }
 
     private fun getUserPassword(): String {
-        val defaultConfigs = ConfigLoader.config.defaultSchemaConfigs
+        defaultSchemaConfigs
         val rabbitMqAppConfig = Files.readString(
-            Path("${defaultConfigs.location}/${defaultConfigs.configNames[DefaultConfigNames.rabbitMQ]}")
+            Path("${defaultSchemaConfigs.location}/${defaultSchemaConfigs.configNames[DefaultConfigNames.rabbitMQ]}")
         )
         val cmData: Map<String, String> = JSON_MAPPER.readValue(rabbitMqAppConfig)
         return cmData["password"]!!
+    }
+
+    companion object {
+        private const val DEFAULT_QUEUE_LENGTH = 1000
+        private const val DEFAULT_STRATEGY = "drop-head"
     }
 }

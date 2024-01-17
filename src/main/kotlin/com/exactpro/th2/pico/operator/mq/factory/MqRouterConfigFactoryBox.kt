@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,17 @@
 package com.exactpro.th2.pico.operator.mq.factory
 
 import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.MessageRouterConfiguration
 import com.exactpro.th2.pico.operator.mq.QueueConfiguration
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class MqRouterConfigFactoryBox(schemaName: String) : MqRouterConfigFactory(schemaName) {
+class MqRouterConfigFactoryBox(
+    globalExchange: String,
+    schemaName: String
+) : MqRouterConfigFactory(
+    globalExchange,
+    schemaName
+) {
 
     @Override
     override fun createConfig(resource: BoxResource): MessageRouterConfiguration {
@@ -32,7 +37,6 @@ class MqRouterConfigFactoryBox(schemaName: String) : MqRouterConfigFactory(schem
         // add event storage pin config for each resource
         queues[EVENT_STORAGE_PIN_ALIAS] = generatePublishToEstorePin(schemaName, boxName)
 
-        val globalExchange = ConfigLoader.config.rabbitMQManagement.exchangeName
-        return MessageRouterConfiguration(queues, GlobalNotification(globalExchange))
+        return createConfig(queues)
     }
 }

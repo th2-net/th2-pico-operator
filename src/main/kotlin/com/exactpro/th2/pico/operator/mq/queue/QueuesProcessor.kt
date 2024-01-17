@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,45 @@ import com.exactpro.th2.pico.operator.EVENT_STORAGE_PIN_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_BOX_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PARSED_PIN_ALIAS
 import com.exactpro.th2.pico.operator.MESSAGE_STORAGE_PIN_ALIAS
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.repo.BoxResource
-import com.exactpro.th2.pico.operator.schemaName
 import com.rabbitmq.http.client.domain.QueueInfo
 import mu.KotlinLogging
 import java.io.IOException
 
-class QueuesProcessor {
+class QueuesProcessor(
+    private val rabbitMQManager: RabbitMQManager,
+) {
     private val logger = KotlinLogging.logger { }
 
     private val declaredQueues: MutableSet<String> = HashSet()
 
+    private val estoreQueue = Queue(
+        rabbitMQManager.schemaName,
+        EVENT_STORAGE_BOX_ALIAS,
+        EVENT_STORAGE_PIN_ALIAS
+    ).toString()
+
+    private val mstoreQueue = Queue(
+        rabbitMQManager.schemaName,
+        MESSAGE_STORAGE_BOX_ALIAS,
+        MESSAGE_STORAGE_PIN_ALIAS
+    ).toString()
+
+    private val mstoreParsedQueue = Queue(
+        rabbitMQManager.schemaName,
+        MESSAGE_STORAGE_BOX_ALIAS,
+        MESSAGE_STORAGE_PARSED_PIN_ALIAS
+    ).toString()
+
     fun process(resource: BoxResource) {
-        declaredQueues.addAll(DeclareQueueResolver(resource).handle())
-        BindQueueLinkResolver(resource).handle()
+        declaredQueues.addAll(DeclareQueueResolver(resource, rabbitMQManager).handle())
+        BindQueueLinkResolver(resource, rabbitMQManager).handle()
     }
 
     fun removeUnusedQueues() {
-        val allQueues: List<QueueInfo> = RabbitMQManager.getAllQueues()
-        val channel = RabbitMQManager.channel
+        val allQueues: List<QueueInfo> = rabbitMQManager.getAllQueues()
+        val channel = rabbitMQManager.channel
         for (queue in allQueues) {
             val queueName = queue.name
             if (queueName == estoreQueue || queueName == mstoreQueue || queueName == mstoreParsedQueue) {
@@ -60,9 +78,9 @@ class QueuesProcessor {
     }
 
     fun createStoreQueues() {
-        val persistence = ConfigLoader.config.rabbitMQManagement.persistence
+        val persistence = rabbitMQManager.persistence
         val logMessage = "Queue \"{}\" was successfully declared"
-        var declareResult = RabbitMQManager.channel.queueDeclare(
+        var declareResult = rabbitMQManager.channel.queueDeclare(
             estoreQueue,
             persistence,
             false,
@@ -70,7 +88,7 @@ class QueuesProcessor {
             null
         )
         logger.info(logMessage, declareResult.queue)
-        declareResult = RabbitMQManager.channel.queueDeclare(
+        declareResult = rabbitMQManager.channel.queueDeclare(
             mstoreQueue,
             persistence,
             false,
@@ -78,7 +96,7 @@ class QueuesProcessor {
             null
         )
         logger.info(logMessage, declareResult.queue)
-        declareResult = RabbitMQManager.channel.queueDeclare(
+        declareResult = rabbitMQManager.channel.queueDeclare(
             mstoreParsedQueue,
             persistence,
             false,
@@ -86,25 +104,5 @@ class QueuesProcessor {
             null
         )
         logger.info(logMessage, declareResult.queue)
-    }
-
-    companion object {
-        val estoreQueue = Queue(
-            schemaName,
-            EVENT_STORAGE_BOX_ALIAS,
-            EVENT_STORAGE_PIN_ALIAS
-        ).toString()
-
-        val mstoreQueue = Queue(
-            schemaName,
-            MESSAGE_STORAGE_BOX_ALIAS,
-            MESSAGE_STORAGE_PIN_ALIAS
-        ).toString()
-
-        val mstoreParsedQueue = Queue(
-            schemaName,
-            MESSAGE_STORAGE_BOX_ALIAS,
-            MESSAGE_STORAGE_PARSED_PIN_ALIAS
-        ).toString()
     }
 }

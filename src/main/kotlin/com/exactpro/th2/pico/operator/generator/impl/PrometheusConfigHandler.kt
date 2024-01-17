@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,28 @@
 
 package com.exactpro.th2.pico.operator.generator.impl
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
+import com.exactpro.th2.pico.operator.config.fields.PrometheusPortsConfig
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-class PrometheusConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+class PrometheusConfigHandler(
+    private val resource: BoxResource,
+    private val prometheusPortsConfig: PrometheusPortsConfig,
+    generatedConfigsLocation: String,
+    schemaConfigs: DefaultSchemaConfigs,
+) : ConfigHandler(
+    generatedConfigsLocation,
+    schemaConfigs,
+) {
     private val fileName = "${this.resource.metadata.name}/prometheus.json"
 
     override fun handle() {
         saveConfigFile(
             fileName,
             PrometheusConfig(
-                ConfigLoader.config.prometheus.enabled,
-                ConfigLoader.config.prometheus.getPort()
+                prometheusPortsConfig.enabled,
+                prometheusPortsConfig.acquirePort()
             )
         )
     }

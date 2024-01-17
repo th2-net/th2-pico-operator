@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package com.exactpro.th2.pico.operator.repo
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
-import com.exactpro.th2.pico.operator.schemaName
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
@@ -25,13 +23,14 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.collections.HashMap
 
-object RepositoryLoader {
-    private const val YML_EXTENSION = ".yml"
-    private const val YAML_EXTENSION = ".yaml"
+class RepositoryLoader(
+    repoLocation: String,
+    schemaName: String,
+) {
 
     private val logger = KotlinLogging.logger { }
 
-    private val schemaDir = "${ConfigLoader.config.repoLocation}/$schemaName"
+    private val schemaDir = "$repoLocation/$schemaName"
 
     private inline fun <reified T> loadCustomResourceFile(file: File): T {
         return YAML_MAPPER.readValue(Files.readString(file.toPath()))
@@ -132,5 +131,10 @@ object RepositoryLoader {
             }
         }
         return resources
+    }
+
+    companion object {
+        private const val YML_EXTENSION = ".yml"
+        private const val YAML_EXTENSION = ".yaml"
     }
 }

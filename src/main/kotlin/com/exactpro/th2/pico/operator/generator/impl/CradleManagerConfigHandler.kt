@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,19 @@
 package com.exactpro.th2.pico.operator.generator.impl
 
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
 
-class CradleManagerConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+class CradleManagerConfigHandler(
+    private val resource: BoxResource,
+    generatedConfigsLocation: String,
+    schemaConfigs: DefaultSchemaConfigs,
+) : ConfigHandler(
+    generatedConfigsLocation,
+    schemaConfigs,
+) {
     private val fileName = "${this.resource.metadata.name}/cradle_manager.json"
 
     override fun handle() {

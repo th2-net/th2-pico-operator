@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.exactpro.th2.pico.operator.generator
 
+import com.exactpro.th2.pico.operator.config.ApplicationConfig
 import com.exactpro.th2.pico.operator.generator.impl.BoxAdditionalConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.BoxConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.CradleManagerConfigHandler
@@ -27,23 +28,77 @@ import com.exactpro.th2.pico.operator.generator.impl.LogConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.MqRouterConfigHandler
 import com.exactpro.th2.pico.operator.generator.impl.PrometheusConfigHandler
+import com.exactpro.th2.pico.operator.grpc.factory.GrpcRouterConfigFactory
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.InfraMgrConfigResource
+import com.exactpro.th2.pico.operator.repo.RepositoryLoader
 
-class ConfigProcessor(infraMgrConfig: InfraMgrConfigResource, resource: BoxResource, isOldFormat: Boolean) {
+class ConfigProcessor(
+    infraMgrConfig: InfraMgrConfigResource,
+    resource: BoxResource,
+    isOldFormat: Boolean,
+    appConfig: ApplicationConfig,
+    repositoryLoader: RepositoryLoader,
+) {
     private val configHandlers: List<ConfigHandler> = ArrayList<ConfigHandler>().apply {
-        add(MqConfigHandler(resource))
-        add(BoxConfigHandler(infraMgrConfig, resource))
-        add(BoxAdditionalConfigHandler(infraMgrConfig, resource))
-        add(GrpcConfigHandler(resource))
-        add(DictionaryConfigHandler(resource, isOldFormat))
+        val grpcRouterConfigFactory = GrpcRouterConfigFactory(appConfig.grpc.serverPorts)
+
+        add(
+            MqConfigHandler(
+                resource,
+                appConfig.rabbitMQManagement.exchangeName,
+                appConfig.schemaName,
+                appConfig.generatedConfigsLocation,
+                appConfig.defaultSchemaConfigs
+            )
+        )
+        add(
+            BoxConfigHandler(
+                infraMgrConfig,
+                resource,
+                appConfig.generatedConfigsLocation,
+                appConfig.defaultSchemaConfigs
+            )
+        )
+        add(
+            BoxAdditionalConfigHandler(
+                infraMgrConfig,
+                resource,
+                appConfig.generatedConfigsLocation,
+                appConfig.defaultSchemaConfigs
+            )
+        )
+        add(
+            GrpcConfigHandler(
+                resource,
+                grpcRouterConfigFactory,
+                appConfig.generatedConfigsLocation,
+                appConfig.defaultSchemaConfigs
+            )
+        )
+        add(
+            DictionaryConfigHandler(
+                resource,
+                isOldFormat,
+                repositoryLoader.loadDictionaries(),
+                appConfig.generatedConfigsLocation,
+                appConfig.defaultSchemaConfigs
+            )
+        )
         // DictionaryConfigHandler Has to come before CustomConfigHandler as it modifies values in custom config
-        add(CustomConfigHandler(resource))
-        add(MqRouterConfigHandler(resource))
-        add(LogConfigHandler(resource))
-        add(GrpcRouterConfigHandler(resource))
-        add(CradleManagerConfigHandler(resource))
-        add(PrometheusConfigHandler(resource))
+        add(CustomConfigHandler(resource, appConfig.generatedConfigsLocation, appConfig.defaultSchemaConfigs))
+        add(MqRouterConfigHandler(resource, appConfig.generatedConfigsLocation, appConfig.defaultSchemaConfigs))
+        add(LogConfigHandler(resource, appConfig.generatedConfigsLocation, appConfig.defaultSchemaConfigs))
+        add(GrpcRouterConfigHandler(resource, appConfig.generatedConfigsLocation, appConfig.defaultSchemaConfigs))
+        add(CradleManagerConfigHandler(resource, appConfig.generatedConfigsLocation, appConfig.defaultSchemaConfigs))
+        add(
+            PrometheusConfigHandler(
+                resource,
+                appConfig.prometheus,
+                appConfig.generatedConfigsLocation,
+                appConfig.defaultSchemaConfigs
+            )
+        )
     }
 
     fun process() {

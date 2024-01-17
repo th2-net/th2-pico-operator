@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ import com.exactpro.th2.pico.operator.mq.queue.Queue
 import com.exactpro.th2.pico.operator.mq.queue.RoutingKey
 import com.exactpro.th2.pico.operator.repo.BoxResource
 
-abstract class MqRouterConfigFactory(val schemaName: String) {
+abstract class MqRouterConfigFactory(
+    private val globalExchange: String,
+    protected val schemaName: String
+) {
     abstract fun createConfig(resource: BoxResource): MessageRouterConfiguration
 
     fun generatePublishToEstorePin(schemaName: String, boxName: String) = QueueConfiguration(
@@ -78,4 +81,9 @@ abstract class MqRouterConfigFactory(val schemaName: String) {
         }
         return queues
     }
+
+    protected fun createConfig(queues: Map<String, QueueConfiguration>) = MessageRouterConfiguration(
+        queues,
+        GlobalNotification(globalExchange)
+    )
 }
