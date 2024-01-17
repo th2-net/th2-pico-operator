@@ -29,8 +29,8 @@ const val MESSAGE_STORAGE_BOX_ALIAS = "mstore"
 const val MESSAGE_STORAGE_PIN_ALIAS = "mstore-pin-raw"
 const val MESSAGE_STORAGE_PARSED_PIN_ALIAS = "mstore-pin-parsed"
 
-private const val CONFIG_FILE_SYSTEM_PROPERTY = "pico.operator.config"
-private const val CONFIG_FILE_NAME = "./config.yml"
+const val CONFIG_FILE_SYSTEM_PROPERTY = "pico.operator.config"
+const val CONFIG_FILE_NAME = "./config.yml"
 
 fun main(args: Array<String>) {
     val mode = if (args.isNotEmpty()) args[0] else "full"
