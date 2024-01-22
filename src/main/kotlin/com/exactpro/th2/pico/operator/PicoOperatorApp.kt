@@ -16,6 +16,7 @@
 
 package com.exactpro.th2.pico.operator
 
+import com.exactpro.th2.pico.operator.config.ApplicationConfig
 import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.OperatorRunConfig
 import java.nio.file.Paths
@@ -41,7 +42,7 @@ fun main(args: Array<String>) {
         CONFIG_FILE_NAME
     )
 
-    val appConfig = Paths.get(path).inputStream().use(ConfigLoader::loadConfiguration)
+    val appConfig: ApplicationConfig = Paths.get(path).inputStream().use(ConfigLoader::loadConfiguration)
     PicoOperator(appConfig).run(OperatorRunConfig(mode, old))
     exitProcess(0)
 }

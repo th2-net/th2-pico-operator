@@ -29,9 +29,7 @@ import kotlin.test.assertEquals
 
 class ConfigLoaderTest {
 
-    @Test
-    fun `load configuration test`() {
-        val source = """
+    private val source = """
             repoLocation: th2-infra-schema
             generatedConfigsLocation: workspace/configs
             schemaName: schema
@@ -67,8 +65,10 @@ class ConfigLoaderTest {
                 log4j2Config: log4j2.properties
                 log4pyConfig: log4py.conf
                 zeroLogConfig: zerolog.properties 
-        """.trimIndent()
+    """.trimIndent()
 
+    @Test
+    fun `load configuration test`() {
         val expected = ApplicationConfig(
             Path.of("th2-infra-schema"),
             Path.of("workspace/configs"),
