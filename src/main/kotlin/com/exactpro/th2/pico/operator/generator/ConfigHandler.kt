@@ -57,7 +57,7 @@ abstract class ConfigHandler(
             return
         }
         val target = pathToTargetConfig(fileName)
-        source.copyTo(target)
+        source.copyTo(target, true)
     }
 
     protected fun saveConfigFile(fileName: String, configContent: Any) {
@@ -87,7 +87,7 @@ abstract class ConfigHandler(
                     schemaConfigs.configNames.values.forEach { file ->
                         val source = schemaConfigs.location.resolve(file)
                         val target = dir.resolve(file)
-                        source.copyTo(target, false)
+                        source.copyTo(target, true)
                     }
                 }
             copyLogging(schemaConfigs.location, generatedConfigsLocation)
