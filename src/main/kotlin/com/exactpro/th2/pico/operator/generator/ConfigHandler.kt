@@ -31,7 +31,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
 import kotlin.io.path.outputStream
 
 abstract class ConfigHandler(
@@ -76,7 +75,6 @@ abstract class ConfigHandler(
 
     companion object {
         private val LOGGER = KotlinLogging.logger { }
-        private const val LOGGING_DIR_NAME = "logging"
 
         @OptIn(ExperimentalPathApi::class)
         fun clearOldConfigs(generatedConfigsLocation: Path) {
@@ -91,16 +89,9 @@ abstract class ConfigHandler(
                         val source = schemaConfigs.location.resolve(file)
                         val target = dir.resolve(file)
                         source.copyTo(target, true)
-                        LOGGER.info { "Updated '$target' from '$source' file" }
+                        LOGGER.debug { "Updated '$target' from '$source' file" }
                     }
                 }
-            copyLogging(schemaConfigs.location, generatedConfigsLocation)
-        }
-
-        private fun copyLogging(schemaConfigsLocation: Path, generatedConfigsLocation: Path) {
-            schemaConfigsLocation.resolve(LOGGING_DIR_NAME).listDirectoryEntries().forEach {
-                it.copyTo(generatedConfigsLocation.resolve(it.name), true)
-            }
         }
     }
 }
