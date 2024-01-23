@@ -21,6 +21,7 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
+import mu.KotlinLogging
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.copyTo
@@ -58,6 +59,7 @@ abstract class ConfigHandler(
         }
         val target = pathToTargetConfig(fileName)
         source.copyTo(target, true)
+        LOGGER.info { "Updated '$target' from '$source' file" }
     }
 
     protected fun saveConfigFile(fileName: String, configContent: Any) {
@@ -73,6 +75,7 @@ abstract class ConfigHandler(
     }
 
     companion object {
+        private val LOGGER = KotlinLogging.logger { }
         private const val LOGGING_DIR_NAME = "logging"
 
         @OptIn(ExperimentalPathApi::class)
@@ -88,6 +91,7 @@ abstract class ConfigHandler(
                         val source = schemaConfigs.location.resolve(file)
                         val target = dir.resolve(file)
                         source.copyTo(target, true)
+                        LOGGER.info { "Updated '$target' from '$source' file" }
                     }
                 }
             copyLogging(schemaConfigs.location, generatedConfigsLocation)
