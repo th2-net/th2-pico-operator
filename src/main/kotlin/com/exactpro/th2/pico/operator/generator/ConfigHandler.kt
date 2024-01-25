@@ -57,7 +57,7 @@ abstract class ConfigHandler(
             return
         }
         val target = pathToTargetConfig(fileName)
-        source.copyTo(target, true)
+        source.copyTo(target, overwrite = true)
         LOGGER.info { "Updated '$target' from '$source' file" }
     }
 
@@ -88,7 +88,7 @@ abstract class ConfigHandler(
                     schemaConfigs.configNames.values.forEach { file ->
                         val source = schemaConfigs.location.resolve(file)
                         val target = dir.resolve(file)
-                        source.copyTo(target, true)
+                        source.copyTo(target, overwrite = true)
                         LOGGER.debug { "Updated '$target' from '$source' file" }
                     }
                 }
