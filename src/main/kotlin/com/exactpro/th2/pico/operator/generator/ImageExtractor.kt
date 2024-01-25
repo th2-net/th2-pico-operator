@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package com.exactpro.th2.pico.operator.generator
 
-import com.exactpro.th2.pico.operator.configDir
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.util.Mapper
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 
-object ImageExtractor {
+class ImageExtractor(
+    private val generatedConfigsLocation: Path,
+) {
     private val images: MutableSet<String> = HashSet()
 
     fun process(resource: BoxResource) {
@@ -30,7 +32,7 @@ object ImageExtractor {
     }
 
     fun saveImagesToFile() {
-        val file = File("$configDir/images.json")
+        val file = File("$generatedConfigsLocation/images.json")
         file.parentFile.mkdirs()
         Files.writeString(file.toPath(), Mapper.JSON_MAPPER.writeValueAsString(mapOf("images" to images)))
     }

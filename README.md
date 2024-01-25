@@ -1,4 +1,4 @@
-### Local Run (1.5.0)
+### Local Run (1.5.1)
 1. clone pico-operator repo
 2. build code using `gradle build` command
 3. run with `"-Dconverter.config=./path/to/pico-operator-config"`
@@ -13,33 +13,33 @@ Generated configs will be placed in location specified by `generatedConfigsLocat
 pico-operator-config example:
 
 ```yaml
-repoLocation: location to schema configuration folder
-generatedConfigsLocation: location to place generated configs in
-schemaName: name for schema
+repoLocation: th2-infra-schema # location to schema configuration folder
+generatedConfigsLocation: workspace/configs # location to place generated configs in
+schemaName: schema # name for schema
 rabbitMQManagement:
-  host: rabbit mq server host
-  managementPort: management port from rabbitMq (15672)
-  applicationPort: general port for rabbitMq (5672)
-  vhostName: name for the vhost on rabbit (should be crated before running the application)
-  exchangeName: exchange name for global-notifications
-  username: rabbit mq management user name
-  password: rabbit mq management password
-  persistence: flag for persistence feature on rabbitMq (true/false)
-  schemaPermissions: configuration for permission of user that will be created fot this specific schema
+  host: localhost # rabbit mq server host
+  managementPort: 15672 # management port from rabbitMq (15672)
+  applicationPort: 5672 # general port for rabbitMq (5672)
+  vhostName: th2 # name for the vhost on rabbit (should be crated before running the application)
+  exchangeName: global-notification # exchange name for global-notifications
+  username: "${RABBITMQ_USER}" # rabbit mq management user name
+  password: "${RABBITMQ_PASS}" # rabbit mq management password
+  persistence: true #  flag for persistence feature on rabbitMq (true/false)
+  schemaPermissions: # configuration for permission of user that will be created fot this specific schema
     configure: ""
-    read: ""
-    write: ""
+    read: ".*"
+    write: ".*"
 grpc:
   serverPorts:
-    start: starting port number
-    end: ending port number
+    start: 8091 # starting port number
+    end: 8189 # ending port number
 prometheus:
-   enabled: true or false - default true
-   start: starting port number
-   end: ending port number
+   enabled: false # true or false - default true
+   start: 9000 # starting port number
+   end: 9090 # ending port number
 defaultSchemaConfigs:
-  location: location for default configs that should be copied for each schema
-  configNames: map of <configName, configFileName.extension> for default configs that are needed for each schema
+  location: cfg/defaultConfigs # location for default configs that should be copied for each schema
+  configNames: # map of <configName, configFileName.extension> for default configs that are needed for each schema
     cradle: cradle.json
     cradleManager: cradle_manager.json
     grpcRouter: grpc_router.json
@@ -51,6 +51,10 @@ defaultSchemaConfigs:
 ```
 
 # Release notes
+
+## 1.5.1
+### Refactored:
++ Removed configuration singleton 
 
 ## 1.5.0
 

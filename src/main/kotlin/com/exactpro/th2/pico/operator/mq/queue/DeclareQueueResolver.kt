@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.exactpro.th2.pico.operator.mq.queue
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.repo.BoxResource
-import com.exactpro.th2.pico.operator.schemaName
 import com.rabbitmq.client.Channel
 import mu.KotlinLogging
 
-class DeclareQueueResolver(val resource: BoxResource) {
+class DeclareQueueResolver(
+    val resource: BoxResource,
+    private val rabbitMQManager: RabbitMQManager,
+) {
     private val logger = KotlinLogging.logger { }
     private val resourceName = resource.metadata.name
 
@@ -39,13 +40,13 @@ class DeclareQueueResolver(val resource: BoxResource) {
 
     private fun declareQueues(): Set<String> {
         val declaredQueues: MutableSet<String> = HashSet()
-        val channel: Channel = RabbitMQManager.channel
-        val persistence: Boolean = ConfigLoader.config.rabbitMQManagement.persistence
+        val channel: Channel = rabbitMQManager.channel
+        val persistence: Boolean = rabbitMQManager.persistence
         // get queues that are associated with current box and are not linked through Th2Link resources
         for (pin in resource.spec.pins?.mq?.subscribers ?: emptyList()) {
-            val queue: String = Queue(schemaName, resourceName, pin.name).toString()
-            val newQueueArguments = RabbitMQManager.generateQueueArguments(pin.settings)
-            val currentQueue = RabbitMQManager.getQueue(queue)
+            val queue: String = Queue(rabbitMQManager.schemaName, resourceName, pin.name).toString()
+            val newQueueArguments = rabbitMQManager.generateQueueArguments(pin.settings)
+            val currentQueue = rabbitMQManager.getQueue(queue)
             if (currentQueue != null && !currentQueue.arguments.equals(newQueueArguments)) {
                 logger.warn("Arguments for queue '{}' were modified. Recreating with new arguments", queue)
                 channel.queueDelete(queue)

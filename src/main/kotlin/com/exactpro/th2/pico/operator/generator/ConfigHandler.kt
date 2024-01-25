@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,77 +16,82 @@
 
 package com.exactpro.th2.pico.operator.generator
 
-import com.exactpro.th2.pico.operator.config.ConfigLoader
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
-import com.exactpro.th2.pico.operator.configDir
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.util.Mapper.JSON_MAPPER
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.File
-import java.nio.file.Files
+import mu.KotlinLogging
 import java.nio.file.Path
-import kotlin.io.path.Path
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.exists
+import kotlin.io.path.inputStream
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.outputStream
 
-abstract class ConfigHandler {
-
+abstract class ConfigHandler(
+    protected val generatedConfigsLocation: Path,
+    private val schemaConfigs: DefaultSchemaConfigs,
+) {
     abstract fun handle()
 
-    private fun pathToDefaultConfig(configName: DefaultConfigNames): Path =
-        Path("$defaultConfigsLocation/${defaultConfigNames[configName]}")
+    private fun pathToDefaultConfig(configName: DefaultConfigNames): Path {
+        return requireNotNull(schemaConfigs.configNames[configName]) {
+            "th2 config name for '$configName; isn't declared in config"
+        }.run(schemaConfigs.location::resolve)
+    }
 
     private fun pathToTargetConfig(fileName: String): Path {
-        val file = File("$configDir/$fileName")
-        file.parentFile.mkdirs()
-        return file.toPath()
+        return generatedConfigsLocation.resolve(fileName).also {
+            it.parent.createDirectories()
+        }
     }
 
     protected fun copyDefaultConfig(configName: DefaultConfigNames, fileName: String) {
         val source = pathToDefaultConfig(configName)
-        if (!Files.exists(source)) {
+        if (!source.exists()) {
             return
         }
         val target = pathToTargetConfig(fileName)
-        Files.copy(source, target)
+        source.copyTo(target, overwrite = true)
+        LOGGER.info { "Updated '$target' from '$source' file" }
     }
 
     protected fun saveConfigFile(fileName: String, configContent: Any) {
-        val file = pathToTargetConfig(fileName)
-        val configContentStr = JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(configContent)
-        Files.writeString(file, configContentStr)
+        pathToTargetConfig(fileName).outputStream().use {
+            JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValue(it, configContent)
+        }
     }
 
     protected fun loadDefaultConfig(configName: DefaultConfigNames): Map<String, Any> {
-        val path = pathToDefaultConfig(configName)
-        return YAML_MAPPER.readValue(Files.readString(path))
+        return pathToDefaultConfig(configName).inputStream().use {
+            YAML_MAPPER.readValue(it)
+        }
     }
 
     companion object {
-        private val defaultConfigsLocation = ConfigLoader.config.defaultSchemaConfigs.location
-        private val defaultConfigNames = ConfigLoader.config.defaultSchemaConfigs.configNames
+        private val LOGGER = KotlinLogging.logger { }
 
-        fun clearOldConfigs() {
-            File(configDir).deleteRecursively()
+        @OptIn(ExperimentalPathApi::class)
+        fun clearOldConfigs(generatedConfigsLocation: Path) {
+            generatedConfigsLocation.deleteRecursively()
         }
 
-        fun copyDefaultConfigs() {
-            val directories = File(configDir).listFiles() ?: return
-            directories.forEach { dir ->
-                if (dir.isDirectory) {
-                    ConfigLoader.config.defaultSchemaConfigs.configNames.values.forEach { file ->
-                        if (!File("$dir/$file").exists()) {
-                            Files.copy(Path("$defaultConfigsLocation/$file"), Path("$dir/$file"))
-                        }
+        fun copyDefaultConfigs(schemaConfigs: DefaultSchemaConfigs, generatedConfigsLocation: Path) {
+            generatedConfigsLocation.listDirectoryEntries().asSequence()
+                .filter(Path::isDirectory)
+                .forEach { dir ->
+                    schemaConfigs.configNames.values.forEach { file ->
+                        val source = schemaConfigs.location.resolve(file)
+                        val target = dir.resolve(file)
+                        source.copyTo(target, overwrite = true)
+                        LOGGER.debug { "Updated '$target' from '$source' file" }
                     }
                 }
-            }
-            copyLogging()
-        }
-
-        private fun copyLogging() {
-            val files = File("${ConfigLoader.config.defaultSchemaConfigs.location}/logging").listFiles() ?: return
-            files.forEach {
-                Files.copy(it.toPath(), Path("$configDir/${it.name}"))
-            }
         }
     }
 }

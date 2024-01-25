@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,19 @@
 package com.exactpro.th2.pico.operator.generator.impl
 
 import com.exactpro.th2.pico.operator.config.fields.DefaultConfigNames
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
+import java.nio.file.Path
 
-class LogConfigHandler(private val resource: BoxResource) : ConfigHandler() {
+class LogConfigHandler(
+    private val resource: BoxResource,
+    generatedConfigsLocation: Path,
+    schemaConfigs: DefaultSchemaConfigs,
+) : ConfigHandler(
+    generatedConfigsLocation,
+    schemaConfigs,
+) {
     private val log4j2FileName = "${this.resource.metadata.name}/log4j2.properties"
     private val log4pyFileName = "${this.resource.metadata.name}/log4py.conf"
     private val zeroLogFileName = "${this.resource.metadata.name}/zerolog.properties"

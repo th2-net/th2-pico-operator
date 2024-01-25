@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.config.fields.GrpcConfig
 import com.exactpro.th2.pico.operator.config.fields.PrometheusPortsConfig
 import com.exactpro.th2.pico.operator.config.fields.RabbitMQManagementConfig
+import java.nio.file.Path
 
 data class ApplicationConfig(
-    val repoLocation: String,
-    val generatedConfigsLocation: String,
+    val repoLocation: Path,
+    val generatedConfigsLocation: Path,
     val schemaName: String,
     val rabbitMQManagement: RabbitMQManagementConfig,
     val grpc: GrpcConfig,
     val prometheus: PrometheusPortsConfig,
-    val defaultSchemaConfigs: DefaultSchemaConfigs
+    val defaultSchemaConfigs: DefaultSchemaConfigs,
 )

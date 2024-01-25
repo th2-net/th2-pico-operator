@@ -16,14 +16,21 @@
 
 package com.exactpro.th2.pico.operator.generator.impl
 
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
 import com.exactpro.th2.pico.operator.repo.InfraMgrConfigResource
+import java.nio.file.Path
 
 class BoxConfigHandler(
     private val infraMgrConfig: InfraMgrConfigResource,
-    private val resource: BoxResource
-) : ConfigHandler() {
+    private val resource: BoxResource,
+    generatedConfigsLocation: Path,
+    schemaConfigs: DefaultSchemaConfigs,
+) : ConfigHandler(
+    generatedConfigsLocation,
+    schemaConfigs,
+) {
     private val fileName = "${resource.metadata.name}/box.json"
 
     override fun handle() {

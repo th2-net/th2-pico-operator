@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,36 +23,17 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.apache.commons.text.StringSubstitutor
 import org.apache.commons.text.lookup.StringLookupFactory
-import java.io.FileInputStream
+import java.io.InputStream
 
 object ConfigLoader {
 
-    private const val CONFIG_FILE_SYSTEM_PROPERTY = "pico.operator.config"
-    private const val CONFIG_FILE_NAME = "./config.yml"
-
     private val logger = KotlinLogging.logger { }
 
-    @JvmStatic val config: ApplicationConfig
-
-    init {
-        config = loadConfiguration()
-    }
-
-    @JvmStatic
-    fun loadConfiguration(): ApplicationConfig {
-        val path: String = System.getProperty(
-            CONFIG_FILE_SYSTEM_PROPERTY,
-            CONFIG_FILE_NAME
-        )
-
+    fun loadConfiguration(config: InputStream): ApplicationConfig {
         try {
-            FileInputStream(path)
-                .use { inputStream ->
-                    val stringSubstitute =
-                        StringSubstitutor(StringLookupFactory.INSTANCE.environmentVariableStringLookup())
-                    val content = stringSubstitute.replace(String(inputStream.readAllBytes()))
-                    return YAML_MAPPER.readValue(content)
-                }
+            val stringSubstitute = StringSubstitutor(StringLookupFactory.INSTANCE.environmentVariableStringLookup())
+            val content = stringSubstitute.replace(String(config.readAllBytes()))
+            return YAML_MAPPER.readValue(content)
         } catch (e: UnrecognizedPropertyException) {
             logger.error(
                 "Bad configuration: unknown property(\"{}\") specified in configuration file",

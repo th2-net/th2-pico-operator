@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,16 @@ import com.exactpro.th2.pico.operator.mq.PinAttribute
 import com.exactpro.th2.pico.operator.mq.RabbitMQManager
 import com.exactpro.th2.pico.operator.mq.queue.RoutingKey.Companion.ROUTING_KEY_REGEXP
 import com.exactpro.th2.pico.operator.repo.BoxResource
-import com.exactpro.th2.pico.operator.schemaName
 import mu.KotlinLogging
 
-class BindQueueLinkResolver(val resource: BoxResource) {
+class BindQueueLinkResolver(
+    private val resource: BoxResource,
+    private val rabbitMQManager: RabbitMQManager,
+) {
 
-    private val logger = KotlinLogging.logger { }
+    private val schemaName = rabbitMQManager.schemaName
     private val resourceName = resource.metadata.name
-    private val channel = RabbitMQManager.channel
+    private val channel = rabbitMQManager.channel
 
     fun handle() {
         if (resourceName == EVENT_STORAGE_BOX_ALIAS || resourceName == MESSAGE_STORAGE_BOX_ALIAS) {
@@ -94,20 +96,20 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         try {
             val queueName = queue.queue.toString()
             val routingKeyName = queue.routingKey.toString()
-            val currentQueue = RabbitMQManager.getQueue(queueName)
+            val currentQueue = rabbitMQManager.getQueue(queueName)
             if (currentQueue == null) {
-                logger.info("Queue '{}' does not yet exist. skipping binding", queueName)
+                LOGGER.info("Queue '{}' does not yet exist. skipping binding", queueName)
                 return
             }
             channel.queueBind(queueName, queue.exchange, routingKeyName)
-            logger.info(
+            LOGGER.info(
                 "Queue '{}' successfully bound to '{}'",
                 queueName,
                 routingKeyName
             )
         } catch (e: Exception) {
             val message = "Exception while working with rabbitMq"
-            logger.error(message, e)
+            LOGGER.error(message, e)
             throw e
         }
     }
@@ -117,7 +119,7 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         currentLinks: List<LinkEndpoint>,
     ) {
         val queueName = queue.toString()
-        val bindingOnRabbit = RabbitMQManager.getQueueBindings(queueName)
+        val bindingOnRabbit = rabbitMQManager.getQueueBindings(queueName)
             .map { it.routingKey }
             .filter { it.matches(ROUTING_KEY_REGEXP) && RoutingKey.fromString(it)?.boxName == resourceName }
         val currentBindings = currentLinks.mapTo(HashSet()) {
@@ -126,19 +128,23 @@ class BindQueueLinkResolver(val resource: BoxResource) {
         try {
             bindingOnRabbit.forEach {
                 if (!currentBindings.contains(it)) {
-                    val currentQueue = RabbitMQManager.getQueue(queueName)
+                    val currentQueue = rabbitMQManager.getQueue(queueName)
                     if (currentQueue == null) {
-                        logger.info("Queue '{}' already removed. skipping unbinding", queueName)
+                        LOGGER.info("Queue '{}' already removed. skipping unbinding", queueName)
                         return
                     }
                     channel.queueUnbind(queueName, schemaName, it)
-                    logger.info("Unbind queue '{}' -> '{}'.", it, queueName)
+                    LOGGER.info("Unbind queue '{}' -> '{}'.", it, queueName)
                 }
             }
         } catch (e: Exception) {
             val message = "Exception while removing bindings"
-            logger.error(message, e)
+            LOGGER.error(message, e)
             throw e
         }
+    }
+
+    companion object {
+        private val LOGGER = KotlinLogging.logger { }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.exactpro.th2.pico.operator.generator.impl
 
 import com.exactpro.th2.model.latest.box.Spec
-import com.exactpro.th2.pico.operator.configDir
+import com.exactpro.th2.pico.operator.config.fields.DefaultSchemaConfigs
 import com.exactpro.th2.pico.operator.generator.ConfigHandler
 import com.exactpro.th2.pico.operator.repo.BoxResource
-import com.exactpro.th2.pico.operator.repo.RepositoryContext
+import com.exactpro.th2.pico.operator.repo.DictionaryResource
 import com.exactpro.th2.pico.operator.util.Mapper.YAML_MAPPER
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
@@ -28,12 +28,22 @@ import org.apache.commons.text.StringSubstitutor
 import org.apache.commons.text.lookup.StringLookup
 import org.apache.commons.text.lookup.StringLookupFactory
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.nio.file.Files
-import java.util.*
+import java.nio.file.Path
+import java.util.Base64
 import java.util.zip.GZIPOutputStream
+import kotlin.io.path.createDirectories
+import kotlin.io.path.writeText
 
-class DictionaryConfigHandler(private val resource: BoxResource, private val isOldFormat: Boolean) : ConfigHandler() {
+class DictionaryConfigHandler(
+    private val resource: BoxResource,
+    private val isOldFormat: Boolean,
+    private val dictionaryResources: Map<String, DictionaryResource>,
+    generatedConfigsLocation: Path,
+    schemaConfigs: DefaultSchemaConfigs,
+) : ConfigHandler(
+    generatedConfigsLocation,
+    schemaConfigs,
+) {
     private val logger = KotlinLogging.logger { }
 
     private val dictionariesDir = "${this.resource.metadata.name}/dictionaries"
@@ -43,7 +53,7 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
         val customConfig = resource.spec.customConfig ?: return
         collectDictionaries(resource.spec)
         for (dictionaryName in dictionaries) {
-            val dictionary = RepositoryContext.dictionaries[dictionaryName]
+            val dictionary = dictionaryResources[dictionaryName]
             if (dictionary == null) {
                 logger.error(
                     "Dictionary: {} requested by resource: {} is no present in repository",
@@ -61,9 +71,10 @@ class DictionaryConfigHandler(private val resource: BoxResource, private val isO
     }
 
     private fun saveDictionary(fileName: String, data: String) {
-        val file = File("$configDir/$dictionariesDir/$fileName")
-        file.parentFile.mkdirs()
-        Files.writeString(file.toPath(), data)
+        generatedConfigsLocation.resolve(dictionariesDir).resolve(fileName).apply {
+            parent.createDirectories()
+            writeText(data)
+        }
     }
 
     private fun collectDictionaries(spec: Spec) {
