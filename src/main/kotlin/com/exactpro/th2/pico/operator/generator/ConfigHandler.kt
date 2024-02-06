@@ -31,6 +31,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.notExists
 import kotlin.io.path.outputStream
 
 abstract class ConfigHandler(
@@ -86,10 +87,12 @@ abstract class ConfigHandler(
                 .filter(Path::isDirectory)
                 .forEach { dir ->
                     schemaConfigs.configNames.values.forEach { file ->
-                        val source = schemaConfigs.location.resolve(file)
                         val target = dir.resolve(file)
-                        source.copyTo(target, overwrite = true)
-                        LOGGER.debug { "Updated '$target' from '$source' file" }
+                        if (target.notExists()) {
+                            val source = schemaConfigs.location.resolve(file)
+                            source.copyTo(target, overwrite = false)
+                            LOGGER.debug { "Updated '$target' from '$source' file" }
+                        }
                     }
                 }
         }
