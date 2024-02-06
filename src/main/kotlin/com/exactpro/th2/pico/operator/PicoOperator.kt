@@ -43,7 +43,6 @@ class PicoOperator(
         when (val mode = config.mode) {
             "full" -> {
                 ConfigHandler.clearOldConfigs(appConfig.generatedConfigsLocation)
-                ConfigHandler.copyDefaultConfigs(appConfig.defaultSchemaConfigs, appConfig.generatedConfigsLocation)
                 rabbitMQManager.creteInitialSetup()
 
                 val queuesProcessor = QueuesProcessor(rabbitMQManager).also {
@@ -54,6 +53,7 @@ class PicoOperator(
                     imageExtractor.process(it)
                     queuesProcessor.process(it)
                 }
+                ConfigHandler.copyDefaultConfigs(appConfig.defaultSchemaConfigs, appConfig.generatedConfigsLocation)
                 imageExtractor.saveImagesToFile()
                 queuesProcessor.removeUnusedQueues()
                 rabbitMQManager.closeChannel()
@@ -71,11 +71,11 @@ class PicoOperator(
             }
             "configs" -> {
                 ConfigHandler.clearOldConfigs(appConfig.generatedConfigsLocation)
-                ConfigHandler.copyDefaultConfigs(appConfig.defaultSchemaConfigs, appConfig.generatedConfigsLocation)
                 boxResources.values.forEach {
                     ConfigProcessor(infraMgrConfig, it, config.isOldFormat, appConfig, repositoryLoader).process()
                     imageExtractor.process(it)
                 }
+                ConfigHandler.copyDefaultConfigs(appConfig.defaultSchemaConfigs, appConfig.generatedConfigsLocation)
                 imageExtractor.saveImagesToFile()
             }
             else -> {
