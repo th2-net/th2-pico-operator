@@ -54,7 +54,16 @@ defaultSchemaConfigs:
 
 ## 1.6.0
 ## Feature:
-+ Consider `spec.prometheus.enabled` value from CR to calculate result Prometheus status 
++ Consider `spec.prometheus.enabled` value from CR to calculate result Prometheus status
+
+## Updated:
++ http-client: `5.2.0`
++ kubernetes-client: `6.12.0`
++ jackson-dataformat-yaml: `2.17.0`
++ kotlin-logging: `3.0.5`
+
+## Updated plugins:
++ Migrated to th2 gradle plugin: `0.0.5` (bom: `4.6.1`)
 
 ## 1.5.2
 ### Fix:
