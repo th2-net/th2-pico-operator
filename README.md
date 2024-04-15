@@ -1,4 +1,4 @@
-### Local Run (1.5.2)
+### Local Run (1.6.0)
 1. clone pico-operator repo
 2. build code using `gradle build` command
 3. run with `"-Dconverter.config=./path/to/pico-operator-config"`
@@ -51,6 +51,10 @@ defaultSchemaConfigs:
 ```
 
 # Release notes
+
+## 1.6.0
+## Feature:
++ Consider `spec.prometheus.enabled` value from CR to calculate result Prometheus status 
 
 ## 1.5.2
 ### Fix:
