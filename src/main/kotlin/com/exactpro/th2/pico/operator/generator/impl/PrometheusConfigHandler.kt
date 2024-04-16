@@ -37,7 +37,7 @@ class PrometheusConfigHandler(
         saveConfigFile(
             fileName,
             PrometheusConfig(
-                prometheusPortsConfig.enabled,
+                prometheusPortsConfig.enabled && (resource.spec.prometheus?.enabled ?: true),
                 prometheusPortsConfig.acquirePort()
             )
         )

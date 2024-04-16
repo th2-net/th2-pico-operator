@@ -1,4 +1,4 @@
-### Local Run (1.5.2)
+### Local Run (1.6.0)
 1. clone pico-operator repo
 2. build code using `gradle build` command
 3. run with `"-Dconverter.config=./path/to/pico-operator-config"`
@@ -51,6 +51,19 @@ defaultSchemaConfigs:
 ```
 
 # Release notes
+
+## 1.6.0
+## Feature:
++ Consider `spec.prometheus.enabled` value from CR to calculate result Prometheus status
+
+## Updated:
++ http-client: `5.2.0`
++ kubernetes-client: `6.12.0`
++ jackson-dataformat-yaml: `2.17.0`
++ kotlin-logging: `3.0.5`
+
+## Updated plugins:
++ Migrated to th2 gradle plugin: `0.0.5` (bom: `4.6.1`)
 
 ## 1.5.2
 ### Fix:
