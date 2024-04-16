@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id "io.gitlab.arturbosch.detekt" version "${kotlin_detekt_version}"
     id "com.exactpro.th2.gradle.base" version "0.0.5"
@@ -66,9 +64,8 @@ java {
     withSourcesJar()
 }
 
-
-tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions.jvmTarget = "11"
+kotlin {
+    jvmToolchain(11)
 }
 
 detekt {
