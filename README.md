@@ -55,6 +55,7 @@ defaultSchemaConfigs:
 ## 1.6.0
 ## Feature:
 + Consider `spec.prometheus.enabled` value from CR to calculate result Prometheus status
++ Provided ability to customize component log config via `spec.loggingConfig`
 
 ## Updated:
 + http-client: `5.2.0`

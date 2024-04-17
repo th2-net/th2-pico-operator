@@ -33,6 +33,7 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.notExists
 import kotlin.io.path.outputStream
+import kotlin.io.path.writeText
 
 abstract class ConfigHandler(
     protected val generatedConfigsLocation: Path,
@@ -60,6 +61,10 @@ abstract class ConfigHandler(
         val target = pathToTargetConfig(fileName)
         source.copyTo(target, overwrite = true)
         LOGGER.info { "Updated '$target' from '$source' file" }
+    }
+
+    protected fun saveConfigFile(fileName: String, configContent: String) {
+        pathToTargetConfig(fileName).writeText(configContent)
     }
 
     protected fun saveConfigFile(fileName: String, configContent: Any) {

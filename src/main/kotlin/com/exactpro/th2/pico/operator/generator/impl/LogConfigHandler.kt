@@ -35,8 +35,14 @@ class LogConfigHandler(
     private val zeroLogFileName = "${this.resource.metadata.name}/zerolog.properties"
 
     override fun handle() {
-        copyDefaultConfig(DefaultConfigNames.log4j2Config, log4j2FileName)
-        copyDefaultConfig(DefaultConfigNames.log4pyConfig, log4pyFileName)
-        copyDefaultConfig(DefaultConfigNames.zeroLogConfig, zeroLogFileName)
+        resource.spec.loggingConfig?.let { logConfig ->
+            saveConfigFile(log4j2FileName, logConfig)
+            saveConfigFile(log4pyFileName, logConfig)
+            saveConfigFile(zeroLogFileName, logConfig)
+        } ?: run {
+            copyDefaultConfig(DefaultConfigNames.log4j2Config, log4j2FileName)
+            copyDefaultConfig(DefaultConfigNames.log4pyConfig, log4pyFileName)
+            copyDefaultConfig(DefaultConfigNames.zeroLogConfig, zeroLogFileName)
+        }
     }
 }
