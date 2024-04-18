@@ -52,6 +52,12 @@ defaultSchemaConfigs:
 
 # Release notes
 
+## 1.6.1
++ Updated transitive dependencies to avoid vulnerabilities:
+   + okio: `3.9.0`
+   + okhttp: `4.12.0`
+   + logging-interceptor: `4.12.0`
+
 ## 1.6.0
 ## Feature:
 + Consider `spec.prometheus.enabled` value from CR to calculate result Prometheus status
